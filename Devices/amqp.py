@@ -5,36 +5,39 @@ from redis.commands.json.path import Path
 import threading
 
 from Devices.models import Device,SensorForDevice,Sensor
-from Devices.utils import add_sensor_to_device
+from Devices.utils import add_sensor_to_device,add_sensor,sensor_value
 # client = redis.Redis(host='localhost', port=6379, db=0)
 # result = client.json().get('somejson:1')
-
+router_amqp={}
 
 PMI=PikaMassenger(host='localhost',port=5672,username='guest',password='guest',exchange_name="Message2")
 def callback(ch, method, properties, body):
     try:
-        device=Device.objects.get(name=properties.headers['DeviceNameU'])
         body=json.loads(body)
+        print(body)
         if method.routing_key=="sensore":
-            add_sensor_to_device(device.pk,body['value'])
-        elif "sensor_value" in method.routing_key.lower():
+            add_sensor(body['value'])    
+            PMI.connection._channel.basic_ack(method.delivery_tag)
+            return
+        device=Device.objects.get(name=properties.headers['DeviceNameU'])
+        if method.routing_key=="device_sensore":
+            add_sensor_to_device(device.pk,body['value']) 
+        elif "sensor_" in method.routing_key.lower():
             sensor_name=method.routing_key.split("_")[1]
-            sensor=Sensor.objects.get(uniq_name=sensor_name)
-            sensorFdevice=SensorForDevice.objects.get(sensor=sensor,device=device)
-            for key,value in body.items():
-                sensorFdevice.value[key] =sensorFdevice.value.get(key,[]).append(value)
-            sensorFdevice.save() 
+            sensor_value(sensor_name,device=device,body=body)
         elif "enable_sensore" in method.routing_key.lower():
             sensor_name=method.routing_key.split("_")[1]
             sensor=Sensor.objects.get(uniq_name=sensor_name)
             sensorFdevice=SensorForDevice.objects.get(sensor=sensor,device=device)
             sensorFdevice.enable=body.get("status",)
-    except:
-        pass
+
+    except Exception as e:
+        print(f'<lo: {e.__traceback__.tb_lineno}> error detailed:{e}')
     PMI.connection._channel.basic_ack(method.delivery_tag)
     # client.json().set(json.loads(body))
 
 
-test1=threading.Thread(name="test" , target=PMI.run ,kwargs={'queue_name':"shire",'routing_keys':["device","sensore",],'callback':callback})
+test1=threading.Thread(name="test" , target=PMI.run ,kwargs={'queue_name':"shire",'routing_keys':["device","sensore","device_sensore"],'callback':callback})
 
 
+# test1.start()

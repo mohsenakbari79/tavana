@@ -8,9 +8,10 @@ https://docs.djangoproject.com/en/4.0/howto/deployment/wsgi/
 """
 
 import os
-
+from Devices.amqp import test1
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-
+ 
+test1.start()
 application = get_wsgi_application()
