@@ -87,3 +87,5 @@ local_settings.py
 
 .env
 db.sqlite3
+Devices/amqp2.py
+Devices/mqtt.py
