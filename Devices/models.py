@@ -25,7 +25,7 @@ class SensorForDevice(models.Model):
     device = models.ForeignKey(Device,on_delete=models.CASCADE)
     sensor = models.ForeignKey(Sensor,on_delete=models.CASCADE)
     enable = models.BooleanField(default=True)
-    value=models.JSONField(null=True,blank=True)
+    value = models.JSONField(null=True,blank=True)
     
     class Meta:
         unique_together = ('device', 'sensor',)
