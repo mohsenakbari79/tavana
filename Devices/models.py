@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from Auth.models import AuthDevice
+from django.core.validators import MaxValueValidator, MinValueValidator
 # Create your models here.
 
 
@@ -18,17 +19,45 @@ class Device(models.Model):
 
 
 class Sensor(models.Model):
-    uniq_name=models.CharField(max_length=50,unique=True)
+    uniq_name = models.CharField(max_length=50,unique=True)
+    pin_number = models.IntegerField(default=1,
+        validators=[
+            MaxValueValidator(100),
+            MinValueValidator(1)
+        ])
     
+class SensorValueType(models.Model):
+    sensor = models.ForeignKey(Sensor,on_delete=models.CASCADE,related_name="sensor")
+    name = models.CharField(max_length=15) 
+    TYPE_CHOICES = (
+        ("INT", "integer"),
+        ("STR", "string"),
+    )
+    types = models.CharField(max_length=4,choices=TYPE_CHOICES, default=1)   
+    validation=models.JSONField()
+    def save(self, *args, **kwargs):
+        if self.TYPE_CHOICES == 1:
+            self.validation={
+                "max_value" : None,
+                "min_value" : None,
+            }
+        elif self.TYPE_CHOICES == 2:
+            self.validation={
+                "key_porblem" : [],
+            }
+        super(SensorValueType, self).save(*args, **kwargs)
+    class Meta:
+        unique_together = ('sensor', 'name',)
+
+
 
 class SensorForDevice(models.Model):
-    device = models.ForeignKey(Device,on_delete=models.CASCADE)
+    id = models.AutoField(primary_key=True)
+    device = models.ForeignKey(Device,on_delete=models.CASCADE,related_name="device_sensor")
     sensor = models.ForeignKey(Sensor,on_delete=models.CASCADE)
     enable = models.BooleanField(default=True)
-    value = models.JSONField(null=True,blank=True)
-    
     class Meta:
-        unique_together = ('device', 'sensor',)
+        unique_together = ('device', 'id',)
 
 class PinOfDevice(models.Model):
     device = models.OneToOneField(Device,on_delete=models.CASCADE,primary_key = True)
@@ -40,10 +69,6 @@ class PinOfDevice(models.Model):
             for pin_num in range(self.pin_number):
                 temp[pin_num]=None
             self.pin=temp
-        else:
-            for pin_ume,sensor in self.pin.items():
-                if sensor!=None:
-                    SFD=SensorForDevice.objects.get(sensor=sensor,device=self.device)
         super(PinOfDevice, self).save(*args, **kwargs)
     @property
     def pin_dict(self):

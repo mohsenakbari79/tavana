@@ -1,0 +1,84 @@
+version: '3.8' 
+services:
+  giahino:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: giahino
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    # volumes:
+      # - .:/giahino
+      # - web_static_volume:/giahino/static/
+      # - web_media_volume:/giahino/media
+    restart: always
+    
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - rabbitmq
+    networks:
+      - web_network
+    # environment:
+    #   - "SECRET_KEY=${SECRET_KEY}"
+    #   - "DEBUG=${DEBUG}"
+
+  # nginx:
+  #   container_name: nginx
+  #   build: 
+  #     context: ./nginx
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "80:80"
+  #   depends_on:
+  #     - giahino
+  #   volumes:
+  #     - web_static_volume:/giahino/static
+  #     - web_media_volume:/giahino/media
+  #   networks:
+  #     - nginix_network
+  db:
+    image: postgres
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file: config/.env
+    ports:
+      - "5432:5432"
+    networks:
+      - web_network
+  
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    command: >
+      sh -c "rabbitmq-plugins enable rabbitmq_auth_backend_http &&
+             rabbitmq-plugins enable rabbitmq_management
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+        - web_network
+
+
+networks:
+  web_network:
+    external: true
+  # nginix_network:
+  #   external: true
+volumes:
+  postgres_data:
+    external: true
+  # web_static_volume:
+  #   external: true
+  # web_media_volume:
+  #   external: true
