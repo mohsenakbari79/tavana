@@ -16,4 +16,7 @@ router.register(r'sensor_device', SensorForDeviceViewSet, basename='sensor_devic
 
 urlpatterns = [
 	path('api/', include(router.urls)),
+	path('sensor/value/<str:device>',sensorvalue,name="senosrvalue"),
+	path('sensor/value/<str:device>/<str:sensore>',sensorvalue,name="senosrvalueall"),
+	
 ]

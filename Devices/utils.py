@@ -2,6 +2,14 @@ import json
 from unicodedata import name
 from Devices.models import Device,Sensor,SensorForDevice
 from collections import defaultdict
+from influxdb import InfluxDBClient
+from datetime import datetime
+from decouple import config
+#Setup database
+redisclient = InfluxDBClient("localhost", 8086, 'admin', 'Password1')
+redisclient.create_database('mydb')
+redisclient.switch_database('mydb')
+
 def add_sensor(listsernsor:list): 
     if len(listsernsor):
         for name_sensor in  listsernsor:
@@ -21,26 +29,56 @@ def add_sensor_to_device(deviceid:int,listsernsor:list) ->bool:
 
 
 def sensor_value(device:object,id_sensor:int,body:json):
-    sensor=device.sensor.get(pk=id_sensor)
-    if sensor.types == "STR":
+    sensorvaluecheck=True
+    sensor=device.device_sensor.get(pk=id_sensor).sensor
+    sensor_vlaue=sensor.sensorvaluetype
+    if sensor_vlaue.types == "STR":
+        json_payload = [] 
         for data in  body.get("data"):
             if data in sensor.validation.get("key_porblem",[]):
                 pass
-            else:
-                pass
-                # TODO : save in infux db
-    elif sensor.types == "INT":
+            else: 
+                data = {
+                    "measurement":device.name ,
+                    "tags": {
+                        "sensor":sensor.name,
+                        "sensor_value":sensor.pk
+                        },
+                    "time": datetime.now(),
+                    "fields": {
+                        'data': data,
+                    } 
+
+                }
+                json_payload.append(data)
+
+    elif sensor_vlaue.types == "INT":
         min_v = sensor.validation.get("min_value") if sensor.validation.get("min_value").isdigit() else float("-inf")
         max_v = sensor.validation.get("max_value") if sensor.validation.get("max_value").isdigit() else float("inf")
         for data in  body.get("data"): 
             if  min_v< data < max_v :
-                pass
-                # TODO : save in infux db
+                data = {
+                    "measurement":device.name ,
+                    "tags": {
+                        "sensor_id":sensor_vlaue.pk
+                        },
+                    "time": datetime.now(),
+                    "fields": {
+                        'data': data,
+                    } 
+
+                }
+                json_payload.append(data)
             else:
-                pass 
+                pass
+    redisclient.write_points(json_payload)
+    # if sensorvaluecheck:
+    #     pin_and_sensor_of_device()
+ 
 def pin_and_sensor_of_device(device:object):
     pin = device.pinofdevice.pin
     res = defaultdict(list)
+    senosr = device.device_sensor.all()
     respons={
         "type" : "Sensor",
         "value" : [] ,
@@ -51,9 +89,9 @@ def pin_and_sensor_of_device(device:object):
     for sensor ,value in res.items():
         respons["value"].append({
             "id": sensor,
-            "name": Sensor.objects.get(pk=sensor).uniq_name,
+            "name": senosr.get(pk=sensor).sensor.uniq_name,
             "pins": value,
-            "active":"enable"
+            "active":senosr.get(pk=sensor).enable
         })
     return json.dumps(respons)
      
