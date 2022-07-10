@@ -3,6 +3,12 @@ from django.contrib.auth import authenticate
 from django.views.decorators.csrf import csrf_exempt
 from Auth.models import AuthDevice
 from Devices.amqp import PMI
+# dj rest auth config email 
+from allauth.account.views import ConfirmEmailView
+from django.contrib.auth import get_user_model
+from django.urls import reverse
+from django.shortcuts import redirect
+
 
 @csrf_exempt
 def auth_device(request):
@@ -52,3 +58,23 @@ def topic(request):
     pass
     # print(":) ******************************* :( ")
     # return HttpResponse("allow")
+
+
+class CustomConfirmEmailView(ConfirmEmailView):
+    def get(self, *args, **kwargs):
+        try:
+            self.object = self.get_object()
+        except Http404:
+            self.object = None
+        user = get_user_model().objects.get(email=self.object.email_address.email)
+        print("***************\n***************\n***************\n***************\n***************\n")
+        print(user.EMAIL_FIELD)
+        print("***************\n***************\n***************\n***************\n***************\n")
+        print(user.emailaddress_set)
+        print("***************\n***************\n***************\n***************\n***************\n")
+        print(user.get_email_field_name)
+        print("***************\n***************\n***************\n***************\n***************\n")
+        print(user.email_user)
+        
+        redirect_url = reverse('auth:rest_user_details')
+        return redirect(redirect_url)

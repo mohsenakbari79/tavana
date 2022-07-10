@@ -35,10 +35,25 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles',\
+    'django.contrib.sites',
+
+    
+
+    #install packeage
     'rest_framework',
-    'Auth',
+    'rest_framework.authtoken',
+
+
+    # dj-rest-auth 
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+
     # my app
+    'Auth',
     'Devices',
 ]
 
@@ -53,6 +68,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'config.urls'
+AUTH_USER_MODEL = 'Auth.User'
 
 TEMPLATES = [
     {
@@ -116,8 +132,14 @@ AUTH_PASSWORD_VALIDATORS = [
 # REST FRAMEWORK
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ],
+    
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+
 }
 
 
@@ -175,3 +197,12 @@ LOGGING = {
     }
 }
 
+
+
+# dj-rest-auth needed
+SITE_ID =1
+REST_USE_JWT = True
+JWT_AUTH_COOKIE = 'access'
+JWT_AUTH_REFRESH_COOKIE = 'refresh'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
