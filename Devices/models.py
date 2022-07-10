@@ -2,11 +2,13 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from Auth.models import AuthDevice
 from django.core.validators import MaxValueValidator, MinValueValidator
+from Auth.models import User 
 # Create your models here.
 
 
 class Device(models.Model):
-    name=models.CharField(max_length=50,blank=True)
+    user = models.ForeignKey("Auth.User",on_delete=models.CASCADE,related_name="device_user") 
+    name=models.CharField(max_length=50,blank=True,unique=True)
     versions=models.IntegerField(default=1,blank=True)
     release=models.FileField(upload_to ='release/',blank=True)
     auth=models.OneToOneField("Auth.AuthDevice",on_delete=models.CASCADE)
@@ -16,6 +18,8 @@ class Device(models.Model):
         self.auth=auth_device
         super(Device, self).save(*args, **kwargs)
     
+    def __str__(self):
+        return f"{self.name}"
 
 
 class Sensor(models.Model):
@@ -25,9 +29,11 @@ class Sensor(models.Model):
             MaxValueValidator(100),
             MinValueValidator(1)
         ])
+    def __str__(self):
+        return f"{self.uniq_name}"
     
 class SensorValueType(models.Model):
-    sensor = models.ForeignKey(Sensor,on_delete=models.CASCADE,related_name="sensor")
+    sensor = models.OneToOneField(Sensor,on_delete=models.CASCADE)
     name = models.CharField(max_length=15) 
     TYPE_CHOICES = (
         ("INT", "integer"),
@@ -46,18 +52,23 @@ class SensorValueType(models.Model):
                 "key_porblem" : [],
             }
         super(SensorValueType, self).save(*args, **kwargs)
+    def __str__(self):
+        return f"{self.name}"
     class Meta:
         unique_together = ('sensor', 'name',)
 
-
+    
 
 class SensorForDevice(models.Model):
     id = models.AutoField(primary_key=True)
     device = models.ForeignKey(Device,on_delete=models.CASCADE,related_name="device_sensor")
     sensor = models.ForeignKey(Sensor,on_delete=models.CASCADE)
     enable = models.BooleanField(default=True)
+    def __str__(self):
+        return f"{self.device.name} - {self.sensor.uniq_name}"
     class Meta:
         unique_together = ('device', 'id',)
+
 
 class PinOfDevice(models.Model):
     device = models.OneToOneField(Device,on_delete=models.CASCADE,primary_key = True)
@@ -70,6 +81,9 @@ class PinOfDevice(models.Model):
                 temp[pin_num]=None
             self.pin=temp
         super(PinOfDevice, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.device.name} - {self.pin_number}"
     @property
     def pin_dict(self):
         return simplejson.loads(self.pin)
