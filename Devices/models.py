@@ -118,14 +118,14 @@ class TimeEnable(models.Model):
     start_time=models.TimeField(blank=True)
     end_time=models.TimeField(blank=True)
     def save(self, *args, **kwargs):
-        all_time=TimeEnable.objects.filter(sensorfordevice=kwargs["sensorfordevice"])
-        if (kwargs["end_day"] != None and kwargs["start_day"] < kwargs["end_day"]) or (kwargs["end_time"] != None and kwargs["start_time"] < kwargs["end_time"]):
+        all_time=TimeEnable.objects.filter(sensorfordevice=self.sensorfordevice)
+        if (self.end_day != None and self.start_day < self.end_day) or (self.end_time != None and self.start_time < self.end_time):
             pass
         for time_check in all_time:          
-            if kwargs["start_day"] != None and kwargs["end_day"] != None and\
+            if self.start_day != None and self.end_day != None and\
                     time_check.start_day != None and time_check.start_day != None and  \
                     (time_check.start_day < d2.start_day < time_check.end_day) or (time_check.start_day < d2.end_day < time_check.end_day) or (d2.start_day <= time_check.start_day and d2.end_day >= time_check.end_day):       
-                if kwargs["start_time"] != None and kwargs["end_time"] != None and\
+                if self.start_time != None and self.end_time != None and\
                     time_check.start_time != None and time_check.start_time != None and  \
                     (time_check.start_time < d2.start_time < time_check.end_time) or (time_check.start_time < d2.end_time < time_check.end_time) or (d2.start_time <= time_check.start_time and d2.end_time >= time_check.end_time):
                     raise ValidationError()  

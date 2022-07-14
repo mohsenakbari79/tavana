@@ -151,7 +151,6 @@ class TimeDefualtValueViewSet(ModelViewSet):
         return super().list(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
-        pin = json.loads(request.data.get("pin"))
         all_time=self.queryset.filter(sensorfordevice=kwargs["sensorfordevice"])
         if (kwargs["end_day"] != None and kwargs["start_day"] < kwargs["end_day"]) or (kwargs["end_time"] != None and kwargs["start_time"] < kwargs["end_time"]):
             pass
