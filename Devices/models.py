@@ -112,7 +112,7 @@ class PinOfDevice(models.Model):
         return simplejson.loads(self.pin)
 
 class TimeEnable(models.Model):
-    sensorfordevice=models.ForeignKey(SensorForDevice,on_delete=models.CASCADE,related_name="time_enable")
+    sensorfordevice=models.ForeignKey("SensorForDevice",on_delete=models.CASCADE,related_name="time_enable")
     start_day=models.DateField(null=True,blank=True)
     end_day=models.DateField(blank=True)
     start_time=models.TimeField(blank=True)
