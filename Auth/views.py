@@ -15,7 +15,7 @@ def auth_device(request):
     if 'username' in request.POST and 'password' in request.POST:
         token = request.POST.get('username',"")
         mac_device  = request.POST.get('password',"")
-        if  str(token) == "guest" and mac_device =="guest":
+        if  str(token) == "shire" and mac_device =="shire":
             return HttpResponse("allow administrator")
         auth_device=AuthDevice.objects.get_or_create(token=token)[0]
         PMI.add_queue(token)
@@ -33,28 +33,26 @@ def auth_device(request):
 def vhost(request):
     try:
         if 'username' in request.POST:
-            token = request.POST.get('username',"")
-            user = Auth.objects.filter(pk=token).exists()
             tags= request.POST.get('tags',"")
             if tags == "administrator":
-                return HttpResponse("allow administrator")
+                return HttpResponse("allow")
+            token = request.POST.get('username',"")
+            user = AuthDevice.objects.filter(pk=token).exists()
+            
             return HttpResponse("allow")
         return HttpResponse("deny")
-    except:
+    except Exception as e:
         return HttpResponse("deny")
     
 
 @csrf_exempt
 def resource(request):
-    print("\n\n\n resource test  &***** ",request.post)
-
     pass
     # print(":) ******************************* :( ")
     # return HttpResponse("allow")
 
 @csrf_exempt
 def topic(request):
-    print("\n\n\ntopic test  &***** ")
     pass
     # print(":) ******************************* :( ")
     # return HttpResponse("allow")

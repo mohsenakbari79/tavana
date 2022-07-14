@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AuthDevice',
             fields=[
-                ('token', models.IntegerField(default=Auth.models.create_new_ref_number, primary_key=True, serialize=False, unique=True)),
+                ('token', models.CharField(max_length=10,default=Auth.models.create_new_ref_number, primary_key=True, serialize=False, unique=True)),
                 ('mac_addres', models.CharField(blank=True, max_length=50, null=True, unique=True)),
             ],
         ),
