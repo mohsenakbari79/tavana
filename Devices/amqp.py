@@ -5,15 +5,17 @@ import json
 import threading
 # from Auth.models import AuthDevice
 # from Devices.models import Device,SensorForDevice,Sensor
-from Devices.utils import add_sensor_to_device,add_sensor,sensor_value
+from Devices.utils import add_sensor_to_device,add_sensor,sensor_value,pin_and_sensor_of_device
 # client = redis.Redis(host='localhost', port=6379, db=0)
 # result = client.json().get('somejson:1')
+from time import sleep
 router_amqp={}
+sleep(10)
+PMI=PikaMassenger(host='rabbitmq',port=5672,username='shire',password='shire',exchange_name="Message2")
 
-PMI=PikaMassenger(host='localhost',port=5672,username='guest',password='guest',exchange_name="Message2")
+
 def callback(ch, method, properties, body):
     try:
-        print("*******************************\n",ch.__dict__,"\n*******************************\n",method.__dict__,"\n*******************************\n",properties.__dict__)
         body=json.loads(body)
         swich= body.get('type',None)
         device_auth_id=method.routing_key
@@ -22,8 +24,8 @@ def callback(ch, method, properties, body):
             if swich == "sensor_value":
                 id_sensor = body.get('type',None)
                 sensor_value(device,id_sensor,body)
-            elif swich == "pin":
-                PMI.send_message(method.routing_key,json.loads(device.pinofdevice.pin))
+            elif swich == "Sensors":
+                PMI.send_message(method.routing_key,json.loads(pin_and_sensor_of_device(device)))
         # print(body)
         # # if method.routing_key:
         # if method.router_key:

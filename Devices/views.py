@@ -8,14 +8,15 @@ from rest_framework.decorators import api_view
 # from rest_framework.response import Response
 # from rest_framework import authentication, permissions
 from Auth.models import User
-from Devices.models import Device,Sensor,PinOfDevice,SensorForDevice
-from Devices.serializers import DeviceSerializer,SensoreSerializer,PinSerializer,SensoreForDeviceSerializer
+from Devices.models import Device,Sensor,Relay,PinOfDevice,SensorForDevice
+from Devices.serializers import DeviceSerializer,SensoreSerializer,PinSerializer,SensoreForDeviceSerializer,RelayForDevice
 from collections import Counter,defaultdict
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.response import Response
 from rest_framework import status
 from Devices.utils import redisclient
 import json
+
 class DeviceViewSet(ModelViewSet):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
@@ -32,6 +33,18 @@ class SensorViewSet(ModelViewSet):
     queryset = Sensor.objects.all()
     serializer_class =  SensoreSerializer
     http_method_names = ['post', 'get', 'delete', 'put']
+    search_fields = ('uniq_name')
+
+class RelayViewSet():
+    queryset = Relay.objects.all()
+    serializer_class =  RelaySerializer
+    http_method_names = ['post' , 'get', 'delete', 'put']
+    search_fields = ('uniq_name')
+
+class RelayForDeviceViewSet(ModelViewSet):
+    queryset = RelayForDevice.objects.all()
+    serializer_class =  RelayForDeviceSerializer
+    http_method_names = ['post' , 'get', 'delete', 'put']
     search_fields = ('uniq_name')
 
 class SensorForDeviceViewSet(ModelViewSet):
@@ -94,12 +107,60 @@ class PinForDeviceViewSet(ModelViewSet):
             pin_counter.pop(None)
             try:
                 for key,value in pin_counter.items():
-                    sensor = self.queryset.get(pk=kwargs["pk"]).device.device_sensor.get(pk=key).sensor
-                    if value != sensor.pin_number :
+                    split_key=key.split("_")
+                    sensor =None
+                    if split_key[0]=="sensor":
+                        sensor = self.queryset.get(pk=kwargs["pk"]).device.device_sensor.get(pk=split_key[1]).sensor
+                    if split_key[0] in ["sensor","device"]:
+                        return Response({'error': f"A sensor {key} not good format (sensor_pk | relay_pk) "}, status=status.HTTP_400_BAD_REQUEST)
+                    elif sensor != None and value != sensor.pin_number :
                         return Response({'error': f"A sensor {sensor.uniq_name} has {sensor.pin_number} pins while you have given {sensor}"}, status=status.HTTP_400_BAD_REQUEST)
             except ObjectDoesNotExist:
                 return Response({'error': f"Use the corresponding device sensors for all pins"}, status=status.HTTP_400_BAD_REQUEST)
         return super().update(request, *args, **kwargs) 
+
+
+class SensorForDeviceViewSet(ModelViewSet):
+    queryset = SensorForDevice.objects.all()
+    serializer_class =  SensoreForDeviceSerializer
+    http_method_names = ['post' , 'get', 'delete', 'put']
+    search_fields = ('uniq_name')
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+
+    def list(self, request, *args, **kwargs):
+        result = super().list(request, *args, **kwargs)
+        return result
+
+class TimeDefualtValueViewSet(ModelViewSet):
+    queryset = SensorForDevice.objects.all()
+    serializer_class =  SensoreForDeviceSerializer
+    http_method_names = ['post' , 'get', 'delete', 'put']
+    # search_fields = ('uniq_name')
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        pin = json.loads(request.data.get("pin"))
+        all_time=TimeEnable.objects.filter(sensorfordevice=kwargs["sensorfordevice"])
+        if (kwargs["end_day"] != None and kwargs["start_day"] < kwargs["end_day"]) or (kwargs["end_time"] != None and kwargs["start_time"] < kwargs["end_time"]):
+            pass
+        for time_check in all_time:          
+            if kwargs["start_day"] != None and kwargs["end_day"] != None and\
+                    time_check.start_day != None and time_check.start_day != None and  \
+                    (time_check.start_day < d2.start_day < time_check.end_day) or (time_check.start_day < d2.end_day < time_check.end_day) or (d2.start_day <= time_check.start_day and d2.end_day >= time_check.end_day):       
+                if kwargs["start_time"] != None and kwargs["end_time"] != None and\
+                    time_check.start_time != None and time_check.start_time != None and  \
+                    (time_check.start_time < d2.start_time < time_check.end_time) or (time_check.start_time < d2.end_time < time_check.end_time) or (d2.start_time <= time_check.start_time and d2.end_time >= time_check.end_time):
+                    raise ValidationError()  
+        return super().update(request, *args, **kwargs)
+    
+
 
 # @api_view(['GET', 'POST'])
 # def sensorvalue(request,device,sensore=None):
@@ -129,6 +190,9 @@ class PinForDeviceViewSet(ModelViewSet):
 #     except Exception as e:
 #         print("salam",e, e.__traceback__.tb_lineno )
 #         return Response({'error': f"not exit device or senore by id entered"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 @api_view(['GET', 'POST'])
 def sensorvalue(request,device,sensore=None):
@@ -162,3 +226,5 @@ def sensorvalue(request,device,sensore=None):
     except Exception as e:
         print("salam",e, e.__traceback__.tb_lineno )
         return Response({'error': f"not exit device or senore by id entered"}, status=status.HTTP_400_BAD_REQUEST)
+
+

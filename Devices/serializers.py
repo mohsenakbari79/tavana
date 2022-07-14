@@ -17,6 +17,11 @@ class SensoreSerializer(serializers.ModelSerializer):
         model = Sensor
         fields = ('uniq_name','pin_number')
 
+class RelaySerializer(serializers.ModelSerializer):
+    uniq_name = serializers.CharField()
+    class Meta:
+        model = Sensor
+        fields = ('uniq_name',)
 
 class PinSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,7 +29,12 @@ class PinSerializer(serializers.ModelSerializer):
         fields = ('device','pin_number','pin')
 
 
-class SensoreForDeviceSerializer(serializers.ModelSerializer):
+class SensorForDeviceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SensorForDevice
+        fields = ('device','sensor','enable',)
+
+class RelayForDeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = SensorForDevice
         fields = ('device','sensor','enable',)

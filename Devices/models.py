@@ -31,33 +31,34 @@ class Sensor(models.Model):
         ])
     def __str__(self):
         return f"{self.uniq_name}"
-    
+
+class Relay(models.Model):
+    uniq_name = model.CharField()
+
+class RelayForDevice(models.Model):
+    id = models.AutoField(primary_key=True)
+    device = models.ForeignKey(Device,on_delete=models.CASCADE,related_name="device_relay")
+    relay = models.ForeignKey(Rele,on_delete=models.CASCADE)
+    enable = models.BooleanField(default=True)
+    def __str__(self):
+        return f"{self.device.name} - {self.sensor.uniq_name}"
+    class Meta:
+        unique_together = ('device', 'id',)
+
 class SensorValueType(models.Model):
-    sensor = models.OneToOneField(Sensor,on_delete=models.CASCADE)
+    sensor = models.ForeignKey(Sensor,on_delete=models.CASCADE)
+    sort = model.IntegerField(default=0)
     name = models.CharField(max_length=15) 
     TYPE_CHOICES = (
         ("INT", "integer"),
         ("STR", "string"),
     )
     types = models.CharField(max_length=4,choices=TYPE_CHOICES, default=1)   
-    validation=models.JSONField()
-    def save(self, *args, **kwargs):
-        if self.TYPE_CHOICES == 1:
-            self.validation={
-                "max_value" : None,
-                "min_value" : None,
-            }
-        elif self.TYPE_CHOICES == 2:
-            self.validation={
-                "key_porblem" : [],
-            }
-        super(SensorValueType, self).save(*args, **kwargs)
     def __str__(self):
         return f"{self.name}"
     class Meta:
         unique_together = ('sensor', 'name',)
 
-    
 
 class SensorForDevice(models.Model):
     id = models.AutoField(primary_key=True)
@@ -68,6 +69,28 @@ class SensorForDevice(models.Model):
         return f"{self.device.name} - {self.sensor.uniq_name}"
     class Meta:
         unique_together = ('device', 'id',)
+
+class SensorDeviceValidation(models.Model):
+    device_sensor=model.ForeignKey(SensorForDevice,related_name="sensorvalidation")
+    senortype=model.ForeignKey()
+    validation=models.JSONField()
+    def save(self, *args, **kwargs):
+        if self.senortype.TYPE_CHOICES == 1 and self.validation is  None:
+            self.validation={
+                "max_value" : None,
+                "min_value" : None,
+            }
+        elif self.senortype.TYPE_CHOICES == 2 and self.validation is  None:
+            self.validation={
+                "key_porblem" : [],
+            }
+        super(SensorValueType, self).save(*args, **kwargs)
+    def __str__(self):
+        return f"{self.device_sensor.device.name} - {self.device_sensor.sensor.uniq_name}"
+    
+
+    
+
 
 
 class PinOfDevice(models.Model):
@@ -90,10 +113,10 @@ class PinOfDevice(models.Model):
 
 class TimeEnable():
     sensorfordevice=models.ForeignKey(SensorForDevice,on_delete=models.CASCADE,related_name="time_enable")
-    start_day=models.DateField()
-    end_day=models.DateField()
-    start_time=models.TimeField()
-    end_time=models.TimeField()
+    start_day=models.DateField(null=True,blank=True)
+    end_day=models.DateField(blank=True)
+    start_time=models.TimeField(blank=True)
+    end_time=models.TimeField(blank=True)
     def save(self, *args, **kwargs):
         all_time=TimeEnable.objects.filter(sensorfordevice=kwargs["sensorfordevice"])
         if (kwargs["end_day"] != None and kwargs["start_day"] < kwargs["end_day"]) or (kwargs["end_time"] != None and kwargs["start_time"] < kwargs["end_time"]):

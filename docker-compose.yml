@@ -45,6 +45,7 @@ services:
     restart: always
     environment:
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - postgres_data:/var/lib/postgresql/data/
@@ -53,13 +54,26 @@ services:
       - "5432:5432"
     networks:
       - web_network
+    depends_on:
+      - influxdb
   
+  influxdb:
+    image: influxdb:1.8
+    ports:
+      - '8086:8086'
+    # volumes:
+    #   - influxdb-storage:/mnt/shared/code/influxdb2
+    env_file: config/.env
+    networks:
+        - web_network
+   
+
+
   rabbitmq:
-    image: rabbitmq:3-management-alpine
+    build:
+      context: ./Rabbitmqp
+      dockerfile: Dockerfile
     container_name: 'rabbitmq'
-    command: >
-      sh -c "rabbitmq-plugins enable rabbitmq_auth_backend_http &&
-             rabbitmq-plugins enable rabbitmq_management
     ports:
         - 5672:5672
         - 15672:15672
@@ -68,6 +82,12 @@ services:
         - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
     networks:
         - web_network
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "5672" ]
+      interval: 5s
+      timeout: 15s
+      retries: 1
+
 
 
 networks:
