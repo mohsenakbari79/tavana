@@ -34,6 +34,11 @@ class DeviceViewSet(ModelViewSet):
         queryset = super().filter_queryset(queryset)
         queryset = queryset.filter(user=self.request.user)
         return queryset
+    def create(self, request, *args, **kwargs):
+        if self.queryset.filter(name=request.POST.get("name")).exists():
+            return Response({'error': f"name is uniq please not enter anouter name"}, status=status.HTTP_400_BAD_REQUEST)
+
+        return super().create(request, *args, **kwargs)
     
    
 
@@ -115,11 +120,12 @@ class PinForDeviceViewSet(ModelViewSet):
             pin_counter.pop(None)
             try:
                 for key,value in pin_counter.items():
+                    key=str(key)
                     split_key=key.split("_")
                     sensor =None
                     if split_key[0]=="sensor":
                         sensor = self.queryset.get(pk=kwargs["pk"]).device.device_sensor.get(pk=split_key[1]).sensor
-                    if split_key[0] in ["sensor","device"]:
+                    if split_key[0] not in ["sensor","device"]:
                         return Response({'error': f"A sensor {key} not good format (sensor_pk | relay_pk) "}, status=status.HTTP_400_BAD_REQUEST)
                     elif sensor != None and value != sensor.pin_number :
                         return Response({'error': f"A sensor {sensor.uniq_name} has {sensor.pin_number} pins while you have given {sensor}"}, status=status.HTTP_400_BAD_REQUEST)
@@ -143,7 +149,7 @@ class TimeDefualtValueViewSet(ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         pin = json.loads(request.data.get("pin"))
-        all_time=queryset.filter(sensorfordevice=kwargs["sensorfordevice"])
+        all_time=self.queryset.filter(sensorfordevice=kwargs["sensorfordevice"])
         if (kwargs["end_day"] != None and kwargs["start_day"] < kwargs["end_day"]) or (kwargs["end_time"] != None and kwargs["start_time"] < kwargs["end_time"]):
             pass
         for time_check in all_time:          

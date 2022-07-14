@@ -6,9 +6,12 @@ class DeviceSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
     versions = serializers.IntegerField()
     release = serializers.FileField( allow_null=True)
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault(),
+    )
     class Meta:
         model = Device
-        fields = ('name','versions','release')
+        fields = ('name','versions','release','user')
 
 
 class SensoreSerializer(serializers.ModelSerializer):

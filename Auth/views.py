@@ -49,13 +49,13 @@ def vhost(request):
 def resource(request):
     pass
     # print(":) ******************************* :( ")
-    # return HttpResponse("allow")
+    return HttpResponse("allow")
 
 @csrf_exempt
 def topic(request):
     pass
     # print(":) ******************************* :( ")
-    # return HttpResponse("allow")
+    return HttpResponse("allow")
 
 
 class CustomConfirmEmailView(ConfirmEmailView):
