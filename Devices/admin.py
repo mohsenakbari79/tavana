@@ -1,5 +1,5 @@
 from django.contrib import admin
-from Devices.models import Device,Sensor,SensorForDevice,PinOfDevice,SensorValueType
+from Devices.models import Device,Sensor,SensorForDevice,PinOfDevice,SensorValueType,TimeEnable
 # Register your models here.
 class DeviceCodesAdmin(admin.ModelAdmin):
     exclude = ('auth',)
@@ -33,6 +33,8 @@ class SensorValueTypeAdmin(admin.ModelAdmin):
         return object.sensor.uniq_name
 admin.site.register(SensorValueType,SensorValueTypeAdmin)
 
-
+class TimeEnableTypeAdmin(admin.ModelAdmin):
+    list_display = ("start_day","end_day","start_time","end_time")
+admin.site.register(TimeEnable,TimeEnableTypeAdmin)
 
 
