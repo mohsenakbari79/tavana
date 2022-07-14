@@ -33,12 +33,12 @@ class Sensor(models.Model):
         return f"{self.uniq_name}"
 
 class Relay(models.Model):
-    uniq_name = model.CharField()
+    uniq_name = models.CharField(max_length=25)
 
 class RelayForDevice(models.Model):
     id = models.AutoField(primary_key=True)
     device = models.ForeignKey(Device,on_delete=models.CASCADE,related_name="device_relay")
-    relay = models.ForeignKey(Rele,on_delete=models.CASCADE)
+    relay = models.ForeignKey(Relay,on_delete=models.CASCADE)
     enable = models.BooleanField(default=True)
     def __str__(self):
         return f"{self.device.name} - {self.sensor.uniq_name}"
@@ -47,7 +47,7 @@ class RelayForDevice(models.Model):
 
 class SensorValueType(models.Model):
     sensor = models.ForeignKey(Sensor,on_delete=models.CASCADE)
-    sort = model.IntegerField(default=0)
+    sort = models.IntegerField(default=0)
     name = models.CharField(max_length=15) 
     TYPE_CHOICES = (
         ("INT", "integer"),
@@ -71,9 +71,9 @@ class SensorForDevice(models.Model):
         unique_together = ('device', 'id',)
 
 class SensorDeviceValidation(models.Model):
-    device_sensor=model.ForeignKey(SensorForDevice,related_name="sensorvalidation")
-    senortype=model.ForeignKey()
-    validation=models.JSONField()
+    device_sensor = models.ForeignKey(SensorForDevice,on_delete=models.CASCADE,related_name="sensorvalidation")
+    senortype = models.ForeignKey("SensorValueType",on_delete=models.CASCADE)
+    validation = models.JSONField()
     def save(self, *args, **kwargs):
         if self.senortype.TYPE_CHOICES == 1 and self.validation is  None:
             self.validation={
@@ -111,7 +111,7 @@ class PinOfDevice(models.Model):
     def pin_dict(self):
         return simplejson.loads(self.pin)
 
-class TimeEnable():
+class TimeEnable(models.Model):
     sensorfordevice=models.ForeignKey(SensorForDevice,on_delete=models.CASCADE,related_name="time_enable")
     start_day=models.DateField(null=True,blank=True)
     end_day=models.DateField(blank=True)

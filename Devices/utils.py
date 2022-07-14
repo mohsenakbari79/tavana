@@ -100,7 +100,7 @@ def sensor_value(device:object,id_sensor:int,body:json):
                             } 
 
                         }
-                        json_payload.append(data)
+                json_payload.append(data)
 
         elif sensor_vlaue.types == "INT":
             for data in  body.get("values",{}).get("data",[])[index::len_device]: 
@@ -132,7 +132,7 @@ def pin_and_sensor_of_device(device:object):
     pin = device.pinofdevice.pin
     res = defaultdict(list)
     senosr = device.device_sensor.all()
-    relay = device.
+    relay = device.device_relay.all()
 
     respons={
         "type" : "Sensor",
@@ -143,19 +143,19 @@ def pin_and_sensor_of_device(device:object):
             res[val].append(key)
     for sensor_rele ,value in res.items():
         splitsensor_rele=sensor_rele.split("_")
-        if splitsensor_rele[0]=="sensor"
+        if splitsensor_rele[0]=="sensor":
             respons["value"].append({
                 "id": sensor_rele,
                 "name": senosr.get(pk=splitsensor_rele[1]).sensor.uniq_name,
                 "pins": value,
                 "active":senosr.get(pk=splitsensor_rele[1]).enable
             })
-        else splitsensor_rele[0]=="relay"
+        elif splitsensor_rele[0]=="relay":
             respons["value"].append({
                 "id": sensor_rele,
-                "name": senosr.get(pk=splitsensor_rele[1]).sensor.uniq_name,
+                "name": relay.get(pk=splitsensor_rele[1]).relay.uniq_name,
                 "pins": value,
-                "active":senosr.get(pk=splitsensor_rele[1]).enable
+                "active":relay.get(pk=splitsensor_rele[1]).enable
             })
     return json.dumps(respons)
      

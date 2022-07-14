@@ -38,3 +38,8 @@ class RelayForDeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = SensorForDevice
         fields = ('device','sensor','enable',)
+
+class TimeEnableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SensorForDevice
+        fields = ('sensorfordevice','start_day','end_day','start_time','end_time')

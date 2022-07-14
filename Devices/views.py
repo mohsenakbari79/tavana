@@ -8,8 +8,16 @@ from rest_framework.decorators import api_view
 # from rest_framework.response import Response
 # from rest_framework import authentication, permissions
 from Auth.models import User
-from Devices.models import Device,Sensor,Relay,PinOfDevice,SensorForDevice
-from Devices.serializers import DeviceSerializer,SensoreSerializer,PinSerializer,SensoreForDeviceSerializer,RelayForDevice
+from Devices.models import Device,Sensor,Relay,PinOfDevice,SensorForDevice,RelayForDevice,TimeEnable
+from Devices.serializers import (
+    DeviceSerializer,
+    SensoreSerializer,
+    PinSerializer,
+    SensorForDeviceSerializer,
+    RelayForDeviceSerializer,
+    RelaySerializer,
+    TimeEnableSerializer,
+)
 from collections import Counter,defaultdict
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.response import Response
@@ -35,7 +43,7 @@ class SensorViewSet(ModelViewSet):
     http_method_names = ['post', 'get', 'delete', 'put']
     search_fields = ('uniq_name')
 
-class RelayViewSet():
+class RelayViewSet(ModelViewSet):
     queryset = Relay.objects.all()
     serializer_class =  RelaySerializer
     http_method_names = ['post' , 'get', 'delete', 'put']
@@ -49,7 +57,7 @@ class RelayForDeviceViewSet(ModelViewSet):
 
 class SensorForDeviceViewSet(ModelViewSet):
     queryset = SensorForDevice.objects.all()
-    serializer_class =  SensoreForDeviceSerializer
+    serializer_class =  SensorForDeviceSerializer
     http_method_names = ['post' , 'get', 'delete', 'put']
     search_fields = ('uniq_name')
 
@@ -120,22 +128,10 @@ class PinForDeviceViewSet(ModelViewSet):
         return super().update(request, *args, **kwargs) 
 
 
-class SensorForDeviceViewSet(ModelViewSet):
-    queryset = SensorForDevice.objects.all()
-    serializer_class =  SensoreForDeviceSerializer
-    http_method_names = ['post' , 'get', 'delete', 'put']
-    search_fields = ('uniq_name')
-
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
-
-    def list(self, request, *args, **kwargs):
-        result = super().list(request, *args, **kwargs)
-        return result
 
 class TimeDefualtValueViewSet(ModelViewSet):
-    queryset = SensorForDevice.objects.all()
-    serializer_class =  SensoreForDeviceSerializer
+    queryset = TimeEnable.objects.all()
+    serializer_class =  TimeEnableSerializer
     http_method_names = ['post' , 'get', 'delete', 'put']
     # search_fields = ('uniq_name')
 
@@ -147,7 +143,7 @@ class TimeDefualtValueViewSet(ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         pin = json.loads(request.data.get("pin"))
-        all_time=TimeEnable.objects.filter(sensorfordevice=kwargs["sensorfordevice"])
+        all_time=queryset.filter(sensorfordevice=kwargs["sensorfordevice"])
         if (kwargs["end_day"] != None and kwargs["start_day"] < kwargs["end_day"]) or (kwargs["end_time"] != None and kwargs["start_time"] < kwargs["end_time"]):
             pass
         for time_check in all_time:          
