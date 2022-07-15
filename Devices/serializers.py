@@ -1,6 +1,15 @@
 from uuid import uuid1
 from rest_framework import serializers
-from Devices.models import Device,Sensor,PinOfDevice,SensorForDevice,TimeEnable,RelayForDevice,Relay
+from Devices.models import (
+    Device,
+    Sensor,
+    PinOfDevice,
+    SensorForDevice,
+    TimeEnable,
+    RelayForDevice,
+    Relay,
+    SensorValueType,
+)
 
 class DeviceSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
@@ -12,6 +21,7 @@ class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Device
         fields = ('name','versions','release','user')
+    
 
 
 class SensoreSerializer(serializers.ModelSerializer):
@@ -19,6 +29,8 @@ class SensoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sensor
         fields = ('uniq_name','pin_number')
+
+
 
 class RelaySerializer(serializers.ModelSerializer):
     uniq_name = serializers.CharField()
@@ -40,7 +52,13 @@ class SensorForDeviceSerializer(serializers.ModelSerializer):
 class RelayForDeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = RelayForDevice
-        fields = ('device','sensor','enable',)
+        fields = ('device','relay','enable',)
+
+class SensorValueTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SensorValueType
+        fields = ('sensor','sort','name','types')
+
 
 class TimeEnableSerializer(serializers.ModelSerializer):
     class Meta:

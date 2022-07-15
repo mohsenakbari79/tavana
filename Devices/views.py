@@ -8,7 +8,16 @@ from rest_framework.decorators import api_view
 # from rest_framework.response import Response
 # from rest_framework import authentication, permissions
 from Auth.models import User
-from Devices.models import Device,Sensor,Relay,PinOfDevice,SensorForDevice,RelayForDevice,TimeEnable
+from Devices.models import (
+    Device,
+    Sensor,
+    Relay,
+    PinOfDevice,
+    SensorForDevice,
+    RelayForDevice,
+    TimeEnable,
+    SensorValueType,
+)
 from Devices.serializers import (
     DeviceSerializer,
     SensoreSerializer,
@@ -17,6 +26,7 @@ from Devices.serializers import (
     RelayForDeviceSerializer,
     RelaySerializer,
     TimeEnableSerializer,
+    SensorValueTypeSerializer,
 )
 from collections import Counter,defaultdict
 from django.core.exceptions import ObjectDoesNotExist
@@ -37,8 +47,9 @@ class DeviceViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         if self.queryset.filter(name=request.POST.get("name")).exists():
             return Response({'error': f"name is uniq please not enter anouter name"}, status=status.HTTP_400_BAD_REQUEST)
-
-        return super().create(request, *args, **kwargs)
+        device=super().create(request, *args, **kwargs)
+        PinOfDevice(device=self.queryset.get(name=device.data.get("name"))).save()
+        return device
     
    
 
@@ -46,26 +57,30 @@ class SensorViewSet(ModelViewSet):
     queryset = Sensor.objects.all()
     serializer_class =  SensoreSerializer
     http_method_names = ['post', 'get', 'delete', 'put']
-    search_fields = ('uniq_name')
+    search_fields = ('uniq_name',)
 
 class RelayViewSet(ModelViewSet):
     queryset = Relay.objects.all()
     serializer_class =  RelaySerializer
     http_method_names = ['post' , 'get', 'delete', 'put']
-    search_fields = ('uniq_name')
+    search_fields = ('uniq_name',)
 
 class RelayForDeviceViewSet(ModelViewSet):
     queryset = RelayForDevice.objects.all()
     serializer_class =  RelayForDeviceSerializer
     http_method_names = ['post' , 'get', 'delete', 'put']
-    search_fields = ('uniq_name')
+    search_fields = ('uniq_name',)
+
+class SensorValueTypeViewSet(ModelViewSet):
+    queryset = SensorValueType.objects.all()
+    serializer_class = SensorValueTypeSerializer
+    http_method_names = ['post' , 'get', 'delete', 'put']
+    search_fields = ('name',)
 
 class SensorForDeviceViewSet(ModelViewSet):
     queryset = SensorForDevice.objects.all()
     serializer_class =  SensorForDeviceSerializer
     http_method_names = ['post' , 'get', 'delete', 'put']
-    search_fields = ('uniq_name')
-
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
