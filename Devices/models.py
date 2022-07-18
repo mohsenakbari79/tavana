@@ -20,6 +20,22 @@ class Device(models.Model):
     
     def __str__(self):
         return f"{self.name}"
+class Operators(models.Model):
+    TYPE_CHOICES = (
+        ("NUM", "number"),
+        ("STR", "string"),
+    )
+    operator_type = models.CharField(max_length=4,choices=TYPE_CHOICES, default=1) 
+    NAME_CHOICES = (
+        ("eq", "equal"),
+        ("gt", "greater"),
+        ("lt", "lower"),
+        ("ne", "difference"),
+        ("ge", "greater and equal"),
+        ("le", "lower and equal"),
+    )
+    operaror_name = models.CharField(max_length=2,choices=NAME_CHOICES)
+
 
 
 class Sensor(models.Model):
@@ -50,7 +66,7 @@ class SensorValueType(models.Model):
     sort = models.IntegerField(default=0)
     name = models.CharField(max_length=15) 
     TYPE_CHOICES = (
-        ("INT", "integer"),
+        ("Num", "Number"),
         ("STR", "string"),
     )
     types = models.CharField(max_length=4,choices=TYPE_CHOICES, default=1)   
@@ -72,18 +88,17 @@ class SensorForDevice(models.Model):
 
 class SensorDeviceValidation(models.Model):
     device_sensor = models.ForeignKey(SensorForDevice,on_delete=models.CASCADE,related_name="sensorvalidation")
+    sort = models.IntegerField(default=0)
     senortype = models.ForeignKey("SensorValueType",on_delete=models.CASCADE)
-    validation = models.JSONField()
+    relay = models.ForeignKey("RelayForDevice",on_delete=models.CASCADE)
+    operator = models.ForeignKey("Operators",on_delete=models.CASCADE)
+    operator_value = models.CharField(max_length=40)
+    CHOISE_FIELD = (
+        (0 , "enable"),
+        (1 , "disable"),
+    )
+    active = models.IntegerField(default=0,choices=CHOISE_FIELD)
     def save(self, *args, **kwargs):
-        if self.senortype.TYPE_CHOICES == 1 and self.validation is  None:
-            self.validation={
-                "max_value" : None,
-                "min_value" : None,
-            }
-        elif self.senortype.TYPE_CHOICES == 2 and self.validation is  None:
-            self.validation={
-                "key_porblem" : [],
-            }
         super(SensorValueType, self).save(*args, **kwargs)
     def __str__(self):
         return f"{self.device_sensor.device.name} - {self.device_sensor.sensor.uniq_name}"

@@ -5,6 +5,9 @@ from collections import defaultdict
 from influxdb import InfluxDBClient
 from datetime import datetime
 from decouple import config
+from amqp import PMI
+import operator
+
 #Setup database
 redisclient = InfluxDBClient("influxdb", 8086, 'admin', 'Password1')
 redisclient.create_database('mydb')
@@ -72,22 +75,43 @@ def add_sensor_to_device(deviceid:int,listsernsor:list) ->bool:
 #             else:
 #                 pass
 #     redisclient.write_points(json_payload)
-
-
 def sensor_value(device:object,id_sensor:int,body:json):
+    valid_opreatour = {
+        "eq": operator.eq,
+        "gt": operator.gt,
+        "lt": operator.lt,
+        "ne": operator.ne,
+        "ge": operator.ge,
+        "le": operator.le,
+    }
+    valid_type={
+        "NUM": float,
+        "STR": str,
+    }
     sensorvaluecheck=True
     sensor_device=device.device_sensor.get(pk=id_sensor)
     sensor_vlaues=sensor_device.sensor.SensorValueType.all().sorted()
     len_device=sensor_values.count()
     for index,sensor_vlaue in enumerate(sensor_vlaues):
-        if sensor_vlaue.types == "STR":
             json_payload = [] 
             for data in  body.get("values",{}).get("data",[])[index::len_device]:
-                validation=sensor_device.sensorvalidation.all()
+                validation=sensor_device.sensorvalidation.filter(senortype=sensor_vlaue)
+                relay_action={
+                            "type": "action",
+                            "value": [],
+                        }
                 for valid in validation:
-                    if data in valid.validation.get("key_porblem",[]):
-                        pass
-
+                    if valid_opreatour[valid.operator.operaror_name](
+                        valid_type[valid.operator.operator_type](valid.operator_value),
+                        valid_type[valid.operator.operator_type](data)
+                        ):
+                        relay_action["value"].append(
+                                                {
+                                                        "id":valid.relay.pk ,
+                                                        "set": bool(valid.active),
+                                                },
+                                            )
+                PMI.send_message(str(device.auth.token),json.loads(relay_action))      
                 data = {
                             "measurement":device.name ,
                             "tags": {
@@ -101,30 +125,61 @@ def sensor_value(device:object,id_sensor:int,body:json):
 
                         }
                 json_payload.append(data)
+            redisclient.write_points(json_payload)
 
-        elif sensor_vlaue.types == "INT":
-            for data in  body.get("values",{}).get("data",[])[index::len_device]: 
-                validation=sensor_device.sensorvalidation.all()
-                for valid in validation:
-                    min_v = valid.validation.get("min_value") if valid.validation.get("min_value").isdigit() else float("-inf")
-                    max_v = valid.validation.get("max_value") if valid.validation.get("max_value").isdigit() else float("inf")
-                    if not(min_v< data < max_v):
-                        pass
-                data = {
-                        "measurement":device.name ,
-                        "tags": {
-                            "sensor_id":sensor_vlaue.pk
-                            },
-                        "time": datetime.now(),
-                        "fields": {
-                            str(sensor_vlaue.name): data,
-                        } 
 
-                    }
-                json_payload.append(data)
-    redisclient.write_points(json_payload)
-    if sensorvaluecheck:
-        pin_and_sensor_of_device()
+
+# def sensor_value(device:object,id_sensor:int,body:json):
+#     sensorvaluecheck=True
+#     sensor_device=device.device_sensor.get(pk=id_sensor)
+#     sensor_vlaues=sensor_device.sensor.SensorValueType.all().sorted()
+#     len_device=sensor_values.count()
+#     for index,sensor_vlaue in enumerate(sensor_vlaues):
+#         if sensor_vlaue.types == "STR":
+#             json_payload = [] 
+#             for data in  body.get("values",{}).get("data",[])[index::len_device]:
+#                 validation=sensor_device.sensorvalidation.filter(senortype=sensor_vlaue,)
+#                 for valid in validation:
+#                     if data in valid.validation.get("key_porblem",[]):
+#                         pass
+
+#                 data = {
+#                             "measurement":device.name ,
+#                             "tags": {
+#                                 "sensor":sensor_device.sensor.uniq_name,
+#                                 "sensor_value":sensor_device.pk
+#                                 },
+#                             "time": datetime.now(),
+#                             "fields": {
+#                                 str(sensor_vlaue.name): data,
+#                             } 
+
+#                         }
+#                 json_payload.append(data)
+
+#         elif sensor_vlaue.types == "INT":
+#             for data in  body.get("values",{}).get("data",[])[index::len_device]: 
+#                 validation=sensor_device.sensorvalidation.all()
+#                 for valid in validation:
+#                     min_v = valid.validation.get("min_value") if valid.validation.get("min_value").isdigit() else float("-inf")
+#                     max_v = valid.validation.get("max_value") if valid.validation.get("max_value").isdigit() else float("inf")
+#                     if not(min_v< data < max_v):
+#                         pass
+#                 data = {
+#                         "measurement":device.name ,
+#                         "tags": {
+#                             "sensor_id":sensor_vlaue.pk
+#                             },
+#                         "time": datetime.now(),
+#                         "fields": {
+#                             str(sensor_vlaue.name): data,
+#                         } 
+
+#                     }
+#                 json_payload.append(data)
+#     redisclient.write_points(json_payload)
+#     if sensorvaluecheck:
+#         pin_and_sensor_of_device()
  
 
 
