@@ -5,13 +5,28 @@ from collections import defaultdict
 from influxdb import InfluxDBClient
 from datetime import datetime
 from decouple import config
-from amqp import PMI
 import operator
 
 #Setup database
 redisclient = InfluxDBClient("influxdb", 8086, 'admin', 'Password1')
 redisclient.create_database('mydb')
 redisclient.switch_database('mydb')
+
+pin_device_wemousD1R1={
+  "1":("D0",3),
+  "2":("D1",1),
+  "3":("D2",16),
+  "4":("D3",5),
+  "5":("D4",4),
+  "6":("D5",14),
+  "7":("D10",15),
+  "8":("D11",13),
+  "9":("D12",12),
+  "10":("D13",14)
+}
+
+
+
 
 def add_sensor(listsernsor:list): 
     if len(listsernsor):
@@ -75,7 +90,7 @@ def add_sensor_to_device(deviceid:int,listsernsor:list) ->bool:
 #             else:
 #                 pass
 #     redisclient.write_points(json_payload)
-def sensor_value(device:object,id_sensor:int,body:json):
+def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
     valid_opreatour = {
         "eq": operator.eq,
         "gt": operator.gt,
@@ -195,19 +210,19 @@ def pin_and_sensor_of_device(device:object):
     }
     for key, val in sorted(pin.items()):
         if val != None:
-            res[val].append(key)
+            res[val].append(pin_device_wemousD1R1[str(key)][1])
     for sensor_rele ,value in res.items():
         splitsensor_rele=sensor_rele.split("_")
         if splitsensor_rele[0]=="sensor":
             respons["value"].append({
-                "id": sensor_rele,
+                "id": sensor_rele+"_"+"".join(str(x) for x in value ),
                 "name": senosr.get(pk=splitsensor_rele[1]).sensor.uniq_name,
                 "pins": value,
                 "active":senosr.get(pk=splitsensor_rele[1]).enable
             })
         elif splitsensor_rele[0]=="relay":
             respons["value"].append({
-                "id": sensor_rele,
+                "id": sensor_rele+"_"+"".join(str(x) for x in value ),
                 "name": relay.get(pk=splitsensor_rele[1]).relay.uniq_name,
                 "pins": value,
                 "active":relay.get(pk=splitsensor_rele[1]).enable

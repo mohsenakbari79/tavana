@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view
 # from rest_framework.views import APIView
 # from rest_framework.response import Response
 # from rest_framework import authentication, permissions
+from Devices.amqp import PMI
 from Auth.models import User
 from Devices.models import (
     Device,
@@ -129,11 +130,12 @@ class PinForDeviceViewSet(ModelViewSet):
         return super().partial_update(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
-        pin = json.loads(request.data.get("pin"))
-        if pin != None:
-            pin_counter=dict(Counter(pin.values()))
-            pin_counter.pop(None)
-            try:
+        try:
+            pin = json.loads(request.data.get("pin"))
+            device=self.queryset.get(pk=kwargs["pk"]).device
+            if pin != None:
+                pin_counter=dict(Counter(pin.values()))
+                pin_counter.pop(None)
                 for key,value in pin_counter.items():
                     key=str(key)
                     split_key=key.split("_")
@@ -141,15 +143,17 @@ class PinForDeviceViewSet(ModelViewSet):
                     if split_key[0] not in ["sensor","relay"]:
                         return Response({'error': f"A sensor {key} not good format (sensor_pk | relay_pk) "}, status=status.HTTP_400_BAD_REQUEST)
                     if split_key[0]=="sensor":
-                        sensor = self.queryset.get(pk=kwargs["pk"]).device.device_sensor.get(pk=split_key[1]).sensor
+                        sensor = device.device_sensor.get(pk=split_key[1]).sensor
                     else:
-                        relay = self.queryset.get(pk=kwargs["pk"]).device.device_relay.get(pk=split_key[1]).relay
+                        relay = device.device_relay.get(pk=split_key[1]).relay
                     if sensor != None and value != sensor.pin_number :
                         return Response({'error': f"A sensor {sensor.uniq_name} has {sensor.pin_number} pins while you have given {sensor}"}, status=status.HTTP_400_BAD_REQUEST)
                     
-            except ObjectDoesNotExist:
-                return Response({'error': f"Use the corresponding device sensors for all pins"}, status=status.HTTP_400_BAD_REQUEST)
-        return super().update(request, *args, **kwargs) 
+        except ObjectDoesNotExist:
+            return Response({'error': f"Use the corresponding device sensors for all pins"}, status=status.HTTP_400_BAD_REQUEST)
+        PinFdevice = super().update(request, *args, **kwargs) 
+        PMI.send_message(device.auth.token,pin_and_sensor_of_device(device))
+        return PinFdevice
 
 
 

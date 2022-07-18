@@ -8,6 +8,7 @@ import threading
 from Devices.utils import add_sensor_to_device,add_sensor,sensor_value,pin_and_sensor_of_device
 # client = redis.Redis(host='localhost', port=6379, db=0)
 # result = client.json().get('somejson:1')
+
 from time import sleep
 router_amqp={}
 sleep(10)
@@ -21,9 +22,9 @@ def callback(ch, method, properties, body):
         device_auth_id=method.routing_key
         device = AuthDevice.objects.get(pk=device_auth_id).device
         if swich !=None  :
-            if swich == "sensor_value":
+            if swich == "Value":
                 id_sensor = body.get('type',None)
-                sensor_value(device,id_sensor,body)
+                sensor_value(PMI,device,id_sensor,body)
             elif swich == "Sensors":
                 PMI.send_message(method.routing_key,json.loads(pin_and_sensor_of_device(device)))
         # print(body)
