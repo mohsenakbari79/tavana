@@ -25,7 +25,7 @@ def callback(ch, method, properties, body):
             if swich == "Value":
                 id_sensor = body.get('type',None)
                 sensor_value(PMI,device,id_sensor,body)
-            elif swich == "Sensors":
+            elif swich == "Sensors_request":
                 PMI.send_message(method.routing_key,json.loads(pin_and_sensor_of_device(device)))
         # print(body)
         # # if method.routing_key:
