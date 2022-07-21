@@ -13,16 +13,16 @@ redisclient.create_database('mydb')
 redisclient.switch_database('mydb')
 
 pin_device_wemousD1R1={
-  "1":("D0",3),
-  "2":("D1",1),
-  "3":("D2",16),
-  "4":("D3",5),
-  "5":("D4",4),
-  "6":("D5",14),
-  "7":("D10",15),
-  "8":("D11",13),
-  "9":("D12",12),
-  "10":("D13",14)
+  "0":("D0",3),
+  "1":("D1",1),
+  "2":("D2",16),
+  "3":("D3",5),
+  "4":("D4",4),
+  "5":("D5",14),
+  "6":("D10",15),
+  "7":("D11",13),
+  "8":("D12",12),
+  "9":("D13",14),
 }
 
 
@@ -126,7 +126,7 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
                                                         "set": bool(valid.active),
                                                 },
                                             )
-                PMI.send_message(str(device.auth.token),json.loads(relay_action))      
+                PMI.send_message(str(device.auth.mac_addres),json.loads(relay_action))      
                 data = {
                             "measurement":device.name ,
                             "tags": {

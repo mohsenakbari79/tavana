@@ -3,7 +3,7 @@ import json
 # import redis
 # from redis.commands.json.path import Path
 import threading
-# from Auth.models import AuthDevice
+from Auth.models import AuthDevice
 # from Devices.models import Device,SensorForDevice,Sensor
 from Devices.utils import add_sensor_to_device,add_sensor,sensor_value,pin_and_sensor_of_device
 # client = redis.Redis(host='localhost', port=6379, db=0)
@@ -11,22 +11,26 @@ from Devices.utils import add_sensor_to_device,add_sensor,sensor_value,pin_and_s
 
 from time import sleep
 router_amqp={}
-sleep(10)
-PMI=PikaMassenger(host='rabbitmq',port=5672,username='shire',password='shire',exchange_name="Message2")
+# sleep(10)
+PMI=PikaMassenger(host='rabbitmq',port=5672,username='shire',password='shire',exchange_name="amq.topic",exchange_type="topic")
 
 
 def callback(ch, method, properties, body):
     try:
-        body=json.loads(body)
-        swich= body.get('type',None)
+        test=str(body.decode('utf-8'))
+        body=json.loads(test)
+        swich= body.get('type',"{}")
+        print(method.routing_key)
         device_auth_id=method.routing_key
-        device = AuthDevice.objects.get(pk=device_auth_id).device
+        device = AuthDevice.objects.get(mac_addres=device_auth_id).device
         if swich !=None  :
             if swich == "Value":
                 id_sensor = body.get('type',None)
                 sensor_value(PMI,device,id_sensor,body)
             elif swich == "Sensors_request":
-                PMI.send_message(method.routing_key,json.loads(pin_and_sensor_of_device(device)))
+                temp=json.dumps(pin_and_sensor_of_device(device))
+                print(temp)
+                PMI.send_message(method.routing_key,temp)
         # print(body)
         # # if method.routing_key:
         # if method.router_key:
@@ -49,7 +53,8 @@ def callback(ch, method, properties, body):
 
     except Exception as e:
         print(f'<lo: {e.__traceback__.tb_lineno}> error detailed:{e}')
-    PMI.connection._channel.basic_ack(method.delivery_tag)
+    # PMI.connection._channel.basic_ack(method.delivery_tag)
+    ch.basic_ack(delivery_tag = method.delivery_tag)
     # client.json().set(json.loads(body))
 
 

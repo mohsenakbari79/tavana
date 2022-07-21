@@ -20,7 +20,7 @@ class DeviceSerializer(serializers.ModelSerializer):
     )
     class Meta:
         model = Device
-        fields = ('name','versions','release','user')
+        fields = ('pk','name','versions','release','user')
     
 
 
@@ -28,7 +28,7 @@ class SensoreSerializer(serializers.ModelSerializer):
     uniq_name = serializers.CharField()
     class Meta:
         model = Sensor
-        fields = ('uniq_name','pin_number')
+        fields = ('pk','uniq_name','pin_number')
 
 
 
@@ -36,31 +36,31 @@ class RelaySerializer(serializers.ModelSerializer):
     uniq_name = serializers.CharField()
     class Meta:
         model = Relay
-        fields = ('uniq_name',)
+        fields = ('pk','uniq_name',)
 
 class PinSerializer(serializers.ModelSerializer):
     class Meta:
         model = PinOfDevice
-        fields = ('device','pin_number','pin')
+        fields = ('pk','device','pin_number','pin')
 
 
 class SensorForDeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = SensorForDevice
-        fields = ('device','sensor','enable',)
+        fields = ('pk','device','sensor','enable',)
 
 class RelayForDeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = RelayForDevice
-        fields = ('device','relay','enable',)
+        fields = ('pk','device','relay','enable',)
 
 class SensorValueTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = SensorValueType
-        fields = ('sensor','sort','name','types')
+        fields = ('pk','sensor','sort','name','types')
 
 
 class TimeEnableSerializer(serializers.ModelSerializer):
     class Meta:
         model = TimeEnable
-        fields = ('sensorfordevice','start_day','end_day','start_time','end_time')
+        fields = ('pk','sensorfordevice','start_day','end_day','start_time','end_time')

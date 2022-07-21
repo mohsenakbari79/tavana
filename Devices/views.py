@@ -33,8 +33,9 @@ from collections import Counter,defaultdict
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.response import Response
 from rest_framework import status
-from Devices.utils import redisclient
+from Devices.utils import redisclient,pin_and_sensor_of_device
 import json
+import asyncio
 
 class DeviceViewSet(ModelViewSet):
     queryset = Device.objects.all()
@@ -106,7 +107,7 @@ class SensorForDeviceViewSet(ModelViewSet):
 class PinForDeviceViewSet(ModelViewSet):
     queryset = PinOfDevice.objects.all()
     serializer_class = PinSerializer
-    http_method_names = ['post', 'get', 'delete', 'put']   
+    http_method_names = ['get', 'delete', 'put']   
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -152,7 +153,7 @@ class PinForDeviceViewSet(ModelViewSet):
         except ObjectDoesNotExist:
             return Response({'error': f"Use the corresponding device sensors for all pins"}, status=status.HTTP_400_BAD_REQUEST)
         PinFdevice = super().update(request, *args, **kwargs) 
-        PMI.send_message(device.auth.token,pin_and_sensor_of_device(device))
+        PMI.send_message(device.auth.mac_addres,pin_and_sensor_of_device(device))
         return PinFdevice
 
 
