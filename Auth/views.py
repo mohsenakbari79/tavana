@@ -13,19 +13,19 @@ from django.shortcuts import redirect
 @csrf_exempt
 def auth_device(request):
     if 'username' in request.POST and 'password' in request.POST:
-        token = request.POST.get('username',"")
-        mac_device  = request.POST.get('password',"")
+        mac_device = request.POST.get('username',"")
+        token  = request.POST.get('password',"")
         if  str(token) == "shire" and mac_device =="shire":
             return HttpResponse("allow administrator")
         auth_device=AuthDevice.objects.get_or_create(token=token)[0]
-        PMI.add_queue(token)
+        PMI.add_queue(mac_device)
         if auth_device.mac_addres==None:
             auth_device.mac_addres=mac_device
             auth_device.save()
-            return HttpResponse("allow")
+            return HttpResponse("allow administrator")
         else:
             if auth_device.mac_addres==mac_device:
-                return HttpResponse("allow")
+                return HttpResponse("allow administrator")
             else:
                 return HttpResponse("deny")
 

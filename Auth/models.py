@@ -10,8 +10,8 @@ def create_new_ref_number():
 
 # Create your models here.
 class AuthDevice(models.Model):
-    token=models.CharField(max_length=10,default=create_new_ref_number,primary_key=True,unique=True)
-    mac_addres=models.CharField(max_length=50,unique=True,blank=True,null=True)
+    token = models.CharField(max_length=10,default=create_new_ref_number,unique=True)
+    mac_addres = models.CharField(max_length=50,unique=True,blank=True,null=True)
 
 
 
