@@ -117,6 +117,7 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
                     }
             print("\ndata2\n")
             for valid in validation:
+                print("valid", valid)
                 if valid_opreatour[valid.operator.operaror_name](
                     valid_type[valid.operator.operator_type](valid.operator_value),
                     valid_type[valid.operator.operator_type](data)
