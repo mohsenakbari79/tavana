@@ -141,6 +141,7 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
 
                         }
                 json_payload.append(data)
+            print(json_payload)
             redisclient.write_points(json_payload)
 
 
