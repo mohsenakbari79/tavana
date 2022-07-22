@@ -24,8 +24,10 @@ def callback(ch, method, properties, body):
         device = AuthDevice.objects.get(mac_addres=device_auth_id).device
         if swich !=None  :
             if swich == "Value":
-                id_sensor = body.get('type',None)
-                sensor_value(PMI,device,id_sensor,body)
+                id_sensor = body.get('id',None)
+                if id_sensor is not None :
+                    sensor = id_sensor.split("_")[1]
+                    sensor_value(PMI,device,sensor,body)
             elif swich == "Sensors_request":
                 temp=pin_and_sensor_of_device(device)
                 PMI.send_message(method.routing_key,temp)

@@ -104,7 +104,7 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
         "STR": str,
     }
     sensorvaluecheck=True
-    sensor_device=device.device_sensor.get(pk=id_sensor)
+    sensor_device=device.device_sensor.get(pk=int(id_sensor))
     sensor_vlaues=sensor_device.sensor.SensorValueType.all().sorted()
     len_device=sensor_values.count()
     for index,sensor_vlaue in enumerate(sensor_vlaues):
