@@ -105,12 +105,12 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
     }
     sensorvaluecheck=True
     sensor_device=device.device_sensor.get(pk=int(id_sensor))
-    sensor_vlaues=sensor_device.sensor.sensorvaluetype_set.all().order_by("sort")
+    sensor_values=sensor_device.sensor.sensorvaluetype_set.all().order_by("sort")
     len_device=sensor_values.count()
-    for index,sensor_vlaue in enumerate(sensor_vlaues):
+    for index,sensor_value in enumerate(sensor_values):
             json_payload = [] 
             for data in  body.get("values",{}).get("data",[])[index::len_device]:
-                validation=sensor_device.sensorvalidation.filter(senortype=sensor_vlaue)
+                validation=sensor_device.sensorvalidation.filter(senortype=sensor_value)
                 relay_action={
                             "type": "action",
                             "value": [],
@@ -136,7 +136,7 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
                                 },
                             "time": datetime.now(),
                             "fields": {
-                                str(sensor_vlaue.name): data,
+                                str(sensor_value.name): data,
                             } 
 
                         }
