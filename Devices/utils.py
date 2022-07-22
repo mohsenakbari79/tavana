@@ -115,14 +115,11 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
                         "type": "action",
                         "value": [],
                     }
-            print("\ndata2\n")
             for valid in validation:
-                print("valid", valid)
                 if valid_opreatour[valid.operator.operaror_name](
                     valid_type[valid.operator.operator_type](valid.operator_value),
                     valid_type[valid.operator.operator_type](data)
                     ):
-                    print("\n\n\n validations \n\n")
                     relay_action["value"].append(
                                             {
                                                     "id":valid.relay.pk ,
