@@ -105,7 +105,7 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
     }
     sensorvaluecheck=True
     sensor_device=device.device_sensor.get(pk=int(id_sensor))
-    sensor_vlaues=sensor_device.sensor.SensorValueType.all().sorted()
+    sensor_vlaues=sensor_device.sensor.sensorvaluetype_set.all().sorted('sort')
     len_device=sensor_values.count()
     for index,sensor_vlaue in enumerate(sensor_vlaues):
             json_payload = [] 
