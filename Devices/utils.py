@@ -108,45 +108,43 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
     sensor_values=sensor_device.sensor.sensorvaluetype_set.all().order_by("sort")
     len_device=sensor_values.count()
     for index,sensor_value in enumerate(sensor_values):
-            json_payload = [] 
-            for data in  body.get("data",[])[index::len_device]:
-                validation=sensor_device.sensorvalidation.filter(senortype=sensor_value)
-                relay_action={
-                            "type": "action",
-                            "value": [],
-                        }
-                print("\ndata2\n")
-                for valid in validation:
-                    if valid_opreatour[valid.operator.operaror_name](
-                        valid_type[valid.operator.operator_type](valid.operator_value),
-                        valid_type[valid.operator.operator_type](data)
-                        ):
-                        print("\n\n\n validations \n\n")
-                        relay_action["value"].append(
-                                                {
-                                                        "id":valid.relay.pk ,
-                                                        "set": bool(valid.active),
-                                                },
-                                            )
-                if relay_action["value"] is not None:
-                    PMI.send_message(str(device.auth.mac_addres),json.dumps(relay_action))      
-                data = {
-                            "measurement":device.name ,
-                            "tags": {
-                                "sensor":sensor_device.sensor.uniq_name,
-                                "sensor_value":sensor_device.pk
-                                },
-                            "time": datetime.now(),
-                            "fields": {
-                                str(sensor_value.name): data,
-                            } 
+        json_payload = [] 
+        for data in  body.get("data",[])[index::len_device]:
+            validation=sensor_device.sensorvalidation.filter(senortype=sensor_value)
+            relay_action={
+                        "type": "action",
+                        "value": [],
+                    }
+            print("\ndata2\n")
+            for valid in validation:
+                if valid_opreatour[valid.operator.operaror_name](
+                    valid_type[valid.operator.operator_type](valid.operator_value),
+                    valid_type[valid.operator.operator_type](data)
+                    ):
+                    print("\n\n\n validations \n\n")
+                    relay_action["value"].append(
+                                            {
+                                                    "id":valid.relay.pk ,
+                                                    "set": bool(valid.active),
+                                            },
+                                        )
+            if relay_action["value"] is not None:
+                PMI.send_message(str(device.auth.mac_addres),json.dumps(relay_action))      
+            data = {
+                        "measurement":device.name ,
+                        "tags": {
+                            "sensor":sensor_device.sensor.uniq_name,
+                            "sensor_value":sensor_device.pk
+                            },
+                        "time": datetime.now(),
+                        "fields": {
+                            str(sensor_value.name): data,
+                        } 
 
-                        }
-                print("\ndata\n")
-                
-                json_payload.append(data)
-            print("json_payload",json_payload)
-            redisclient.write_points(json_payload)
+                    }
+            
+            json_payload.append(data)
+        redisclient.write_points(json_payload)
 
 
 
