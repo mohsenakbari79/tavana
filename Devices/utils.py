@@ -115,11 +115,13 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
                             "type": "action",
                             "value": [],
                         }
+                print("\ndata2\n")
                 for valid in validation:
                     if valid_opreatour[valid.operator.operaror_name](
                         valid_type[valid.operator.operator_type](valid.operator_value),
                         valid_type[valid.operator.operator_type](data)
                         ):
+                        print("\n\n\n validations \n\n")
                         relay_action["value"].append(
                                                 {
                                                         "id":valid.relay.pk ,
@@ -127,7 +129,7 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
                                                 },
                                             )
                 if relay_action["value"] is not None:
-                    PMI.send_message(str(device.auth.mac_addres),json.loads(relay_action))      
+                    PMI.send_message(str(device.auth.mac_addres),json.dumps(relay_action))      
                 data = {
                             "measurement":device.name ,
                             "tags": {
@@ -140,6 +142,8 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
                             } 
 
                         }
+                print("\ndata\n")
+                
                 json_payload.append(data)
             print("json_payload",json_payload)
             redisclient.write_points(json_payload)
