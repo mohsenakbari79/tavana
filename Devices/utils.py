@@ -109,7 +109,7 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
     len_device=sensor_values.count()
     for index,sensor_value in enumerate(sensor_values):
             json_payload = [] 
-            for data in  body.get("values",{}).get("data",[])[index::len_device]:
+            for data in  body.get("data",[])[index::len_device]:
                 validation=sensor_device.sensorvalidation.filter(senortype=sensor_value)
                 relay_action={
                             "type": "action",
@@ -141,7 +141,7 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
 
                         }
                 json_payload.append(data)
-            print(json_payload)
+            print("json_payload",json_payload)
             redisclient.write_points(json_payload)
 
 
