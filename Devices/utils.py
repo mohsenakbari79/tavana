@@ -211,7 +211,7 @@ def pin_and_sensor_of_device(device:object):
     }
     for key, val in sorted(pin.items()):
         if val != None:
-            res[val].append(pin_device_wemousD1R1[str(key)][1])
+            res[val].append(str(pin_device_wemousD1R1[str(key)][1]))
     for sensor_rele ,value in res.items():
         splitsensor_rele=sensor_rele.split("_")
         if splitsensor_rele[0]=="sensor":
