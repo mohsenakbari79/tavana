@@ -126,7 +126,8 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
                                                         "set": bool(valid.active),
                                                 },
                                             )
-                PMI.send_message(str(device.auth.mac_addres),json.loads(relay_action))      
+                if relay_action["value"] is not None:
+                    PMI.send_message(str(device.auth.mac_addres),json.loads(relay_action))      
                 data = {
                             "measurement":device.name ,
                             "tags": {
@@ -205,7 +206,7 @@ def pin_and_sensor_of_device(device:object):
     relay = device.device_relay.all()
 
     respons={
-        "type" : "Sensor",
+        "type" : "Sensors",
         "value" : [] ,
     }
     for key, val in sorted(pin.items()):

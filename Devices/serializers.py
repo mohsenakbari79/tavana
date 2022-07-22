@@ -39,6 +39,7 @@ class RelaySerializer(serializers.ModelSerializer):
         fields = ('pk','uniq_name',)
 
 class PinSerializer(serializers.ModelSerializer):
+    # device=DeviceSerializer(read_only=True)
     class Meta:
         model = PinOfDevice
         fields = ('pk','device','pin_number','pin')

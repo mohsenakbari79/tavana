@@ -20,7 +20,6 @@ def callback(ch, method, properties, body):
         test=str(body.decode('utf-8'))
         body=json.loads(test)
         swich= body.get('type',"{}")
-        print(method.routing_key)
         device_auth_id=method.routing_key
         device = AuthDevice.objects.get(mac_addres=device_auth_id).device
         if swich !=None  :
@@ -28,8 +27,7 @@ def callback(ch, method, properties, body):
                 id_sensor = body.get('type',None)
                 sensor_value(PMI,device,id_sensor,body)
             elif swich == "Sensors_request":
-                temp=json.dumps(pin_and_sensor_of_device(device))
-                print(temp)
+                temp=pin_and_sensor_of_device(device)
                 PMI.send_message(method.routing_key,temp)
         # print(body)
         # # if method.routing_key:

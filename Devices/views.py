@@ -149,10 +149,12 @@ class PinForDeviceViewSet(ModelViewSet):
                         relay = device.device_relay.get(pk=split_key[1]).relay
                     if sensor != None and value != sensor.pin_number :
                         return Response({'error': f"A sensor {sensor.uniq_name} has {sensor.pin_number} pins while you have given {sensor}"}, status=status.HTTP_400_BAD_REQUEST)
-                    
+                    elif value != 1:
+                        return Response({'error': f"A relay can just one pins"}, status=status.HTTP_400_BAD_REQUEST)
         except ObjectDoesNotExist:
             return Response({'error': f"Use the corresponding device sensors for all pins"}, status=status.HTTP_400_BAD_REQUEST)
         PinFdevice = super().update(request, *args, **kwargs) 
+        print("AMAF FOR SEND DATA",device.auth.mac_addres,pin_and_sensor_of_device(device))
         PMI.send_message(device.auth.mac_addres,pin_and_sensor_of_device(device))
         return PinFdevice
 

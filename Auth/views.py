@@ -15,11 +15,17 @@ def auth_device(request):
     if 'username' in request.POST and 'password' in request.POST:
         mac_device = request.POST.get('username',"")
         token  = request.POST.get('password',"")
+        print("AUTH",request.POST)
         if  str(token) == "shire" and mac_device =="shire":
             return HttpResponse("allow administrator")
-        auth_device=AuthDevice.objects.get_or_create(token=token)[0]
+        try :
+            auth_device=AuthDevice.objects.get(token=token)
+        except:
+            return HttpResponse("deny")         
         PMI.add_queue(mac_device)
         if auth_device.mac_addres==None:
+            if  AuthDevice.objects.filter(mac_addres=mac_device).exists():
+                return HttpResponse("deny")
             auth_device.mac_addres=mac_device
             auth_device.save()
             return HttpResponse("allow administrator")
