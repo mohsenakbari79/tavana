@@ -129,7 +129,7 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
                                                     "set": bool(valid.active),
                                             },
                                         )
-            if relay_action["value"] is not None:
+            if relay_action["value"] is not None and len(relay_action["value"]) !=0:
                 PMI.send_message(str(device.auth.mac_addres),json.dumps(relay_action))      
             data = {
                         "measurement":device.name ,
