@@ -71,6 +71,11 @@ class SensorDeviceValidationViewSet(ModelViewSet):
     queryset = SensorDeviceValidation.objects.all()
     serializer_class =  SensorDeviceValidationSerializer
     http_method_names = ['post' , 'get', 'delete', 'put']
+    def filter_queryset(self, queryset):
+        queryset = super().filter_queryset(queryset)
+        queryset = queryset.filter(device_sensor__device__user=self.request.user)
+        return queryset
+
 
 
 class SensorViewSet(ModelViewSet):
@@ -92,6 +97,11 @@ class RelayForDeviceViewSet(ModelViewSet):
     serializer_class =  RelayForDeviceSerializer
     http_method_names = ['post' , 'get', 'delete', 'put']
     search_fields = ('uniq_name',)
+    def filter_queryset(self, queryset):
+        queryset = super().filter_queryset(queryset)
+        queryset = queryset.filter(device__user=self.request.user)
+        return queryset
+
     def update(self, request, *args, **kwargs):
         result=  super().update(request, *args, **kwargs)
         relay=self.queryset.get(pk=kwargs["pk"]).device
@@ -111,6 +121,11 @@ class SensorForDeviceViewSet(ModelViewSet):
     http_method_names = ['post' , 'get', 'delete', 'put']
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
+
+    def filter_queryset(self, queryset):
+        queryset = super().filter_queryset(queryset)
+        queryset = queryset.filter(device__user=self.request.user)
+        return queryset
 
     def list(self, request, *args, **kwargs):
         result = super().list(request, *args, **kwargs)
@@ -141,6 +156,7 @@ class PinForDeviceViewSet(ModelViewSet):
 
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset)
+        queryset = queryset.filter(device__user=self.request.user)
         return queryset
 
     def list(self, request, *args, **kwargs):
