@@ -39,6 +39,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.response import Response
 from rest_framework import status
 from Devices.utils import redisclient,pin_and_sensor_of_device,ralay_for_device_update
+from rest_framework.permissions import IsAdminUser
 import json
 import asyncio
 
@@ -63,6 +64,7 @@ class OperatorsViewSet(ModelViewSet):
     queryset = Operators.objects.all()
     serializer_class =  OperatorsSerializer
     http_method_names = ['post' , 'get', 'delete', 'put']
+    permission_classes =(IsAdminUser,)
 
     
 class SensorDeviceValidationViewSet(ModelViewSet):
@@ -76,12 +78,14 @@ class SensorViewSet(ModelViewSet):
     serializer_class =  SensoreSerializer
     http_method_names = ['post', 'get', 'delete', 'put']
     search_fields = ('uniq_name',)
+    permission_classes =(IsAdminUser,)
 
 class RelayViewSet(ModelViewSet):
     queryset = Relay.objects.all()
     serializer_class =  RelaySerializer
     http_method_names = ['post' , 'get', 'delete', 'put']
     search_fields = ('uniq_name',)
+    permission_classes =(IsAdminUser,)
 
 class RelayForDeviceViewSet(ModelViewSet):
     queryset = RelayForDevice.objects.all()
