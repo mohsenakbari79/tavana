@@ -35,7 +35,8 @@ class Operators(models.Model):
         ("le", "lower and equal"),
     )
     operaror_name = models.CharField(max_length=2,choices=NAME_CHOICES)
-
+    class Meta:
+        unique_together = ('operator_type', 'operaror_name')
 
 
 class Sensor(models.Model):
@@ -57,7 +58,7 @@ class RelayForDevice(models.Model):
     relay = models.ForeignKey(Relay,on_delete=models.CASCADE)
     enable = models.BooleanField(default=True)
     def __str__(self):
-        return f"{self.device.name} - {self.sensor.uniq_name}"
+        return f"{self.device.name} - {self.relay.uniq_name} - {self.id} "
     class Meta:
         unique_together = ('device', 'id',)
 
@@ -82,7 +83,7 @@ class SensorForDevice(models.Model):
     sensor = models.ForeignKey(Sensor,on_delete=models.CASCADE)
     enable = models.BooleanField(default=True)
     def __str__(self):
-        return f"{self.device.name} - {self.sensor.uniq_name}"
+        return f"{self.device.name} - {self.sensor.uniq_name} - {self.id} "
     class Meta:
         unique_together = ('device', 'id',)
 

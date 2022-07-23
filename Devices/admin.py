@@ -1,5 +1,14 @@
 from django.contrib import admin
-from Devices.models import Device,Sensor,SensorForDevice,PinOfDevice,SensorValueType,TimeEnable
+from Devices.models import (
+    Device,
+    Sensor,
+    SensorForDevice,
+    PinOfDevice,
+    SensorValueType,
+    TimeEnable,
+    Operators,
+    SensorDeviceValidation,
+)
 # Register your models here.
 class DeviceCodesAdmin(admin.ModelAdmin):
     exclude = ('auth',)
@@ -38,3 +47,15 @@ class TimeEnableTypeAdmin(admin.ModelAdmin):
 admin.site.register(TimeEnable,TimeEnableTypeAdmin)
 
 
+
+class OperatorsAdmin(admin.ModelAdmin):
+    list_display = ("operator_type","operaror_name")
+admin.site.register(Operators,OperatorsAdmin)
+
+
+class SensorDeviceValidationAdmin(admin.ModelAdmin):
+    list_display = ("sensor_uniq_name","relay","operator","active")
+    @admin.display(description='sensor uniq_name ')
+    def sensor_uniq_name(self, object):
+        return object.device_sensor.senosr.uniq_name
+admin.site.register(SensorDeviceValidation,SensorDeviceValidationAdmin)

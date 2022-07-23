@@ -33,7 +33,7 @@ from collections import Counter,defaultdict
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.response import Response
 from rest_framework import status
-from Devices.utils import redisclient,pin_and_sensor_of_device
+from Devices.utils import redisclient,pin_and_sensor_of_device,ralay_for_device_update
 import json
 import asyncio
 
@@ -72,7 +72,13 @@ class RelayForDeviceViewSet(ModelViewSet):
     serializer_class =  RelayForDeviceSerializer
     http_method_names = ['post' , 'get', 'delete', 'put']
     search_fields = ('uniq_name',)
-
+    def update(self, request, *args, **kwargs):
+        result=  super().update(request, *args, **kwargs)
+        relay=self.queryset.get(pk=kwargs["pk"]).device
+        answer =ralay_for_device_update(relay,device)
+        if answer[0] == True:
+            PMI.send_message(device.auth.mac_addres,answer[1])
+        return result
 class SensorValueTypeViewSet(ModelViewSet):
     queryset = SensorValueType.objects.all()
     serializer_class = SensorValueTypeSerializer
@@ -101,9 +107,10 @@ class SensorForDeviceViewSet(ModelViewSet):
         return super().partial_update(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
-
-        return super().update(request, *args, **kwargs)
-
+        result=  super().update(request, *args, **kwargs)
+        device=self.queryset.get(pk=kwargs["pk"]).device
+        PMI.send_message(device.auth.mac_addres,pin_and_sensor_of_device(device))
+        return result
 class PinForDeviceViewSet(ModelViewSet):
     queryset = PinOfDevice.objects.all()
     serializer_class = PinSerializer
@@ -153,8 +160,8 @@ class PinForDeviceViewSet(ModelViewSet):
                         return Response({'error': f"A relay can just one pins"}, status=status.HTTP_400_BAD_REQUEST)
         except ObjectDoesNotExist:
             return Response({'error': f"Use the corresponding device sensors for all pins"}, status=status.HTTP_400_BAD_REQUEST)
-        PinFdevice = super().update(request, *args, **kwargs) 
-        print("AMAF FOR SEND DATA",device.auth.mac_addres,pin_and_sensor_of_device(device))
+        PinFdevice = super().update(request, *args, **kwargs)
+        device=self.queryset.get(pk=kwargs["pk"]).device
         PMI.send_message(device.auth.mac_addres,pin_and_sensor_of_device(device))
         return PinFdevice
 

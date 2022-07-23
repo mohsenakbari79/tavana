@@ -231,3 +231,18 @@ def pin_and_sensor_of_device(device:object):
             })
     return json.dumps(respons)
      
+def ralay_for_device_update(relay:object,device:object):
+    pin = device.pinofdevice.pin
+    relay_pin= "relay_"+str(relay.pk)
+    if relay_pin in pin.values():
+        answer ={
+            "type": "Action",
+            "value": [
+                {
+                "id": relay_pin,
+                "set": True if relay.enable else False,
+                }
+            ]
+        }
+        return (True,json.dumps(answer))
+    return (False,"")
