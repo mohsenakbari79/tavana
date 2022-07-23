@@ -110,7 +110,7 @@ class SensorDeviceValidation(models.Model):
 
 
 class PinOfDevice(models.Model):
-    device = models.OneToOneField(Device,on_delete=models.CASCADE,primary_key = True)
+    device = models.OneToOneField(Device,on_delete=models.CASCADE,unique = True)
     pin_number = models.IntegerField(default=10,editable=False)
     pin = models.JSONField(blank=True) # serialized custom data
     def save(self, *args, **kwargs):

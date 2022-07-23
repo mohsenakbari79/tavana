@@ -9,6 +9,9 @@ from Devices.models import (
     RelayForDevice,
     Relay,
     SensorValueType,
+    Operators,
+    SensorDeviceValidation,
+
 )
 
 class DeviceSerializer(serializers.ModelSerializer):
@@ -39,10 +42,18 @@ class RelaySerializer(serializers.ModelSerializer):
         fields = ('pk','uniq_name',)
 
 class PinSerializer(serializers.ModelSerializer):
-    # device=DeviceSerializer(read_only=True)
+    def get_device(self,obj):
+        return {
+            "pk":obj.device.pk,
+            "name":obj.device.name,
+            "versions":obj.device.versions,
+        }
+    device=serializers.SerializerMethodField("get_device")
+    
     class Meta:
         model = PinOfDevice
         fields = ('pk','device','pin_number','pin')
+        read_only_fields = ["device"]
 
 
 class SensorForDeviceSerializer(serializers.ModelSerializer):
@@ -65,3 +76,15 @@ class TimeEnableSerializer(serializers.ModelSerializer):
     class Meta:
         model = TimeEnable
         fields = ('pk','sensorfordevice','start_day','end_day','start_time','end_time')
+
+class OperatorsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Operators
+        fields = ('pk','operator_type','operaror_name')
+
+
+class SensorDeviceValidationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SensorDeviceValidation
+        fields = ('pk',"device_sensor","sort","senortype","relay","operator","operator_value","active")
+

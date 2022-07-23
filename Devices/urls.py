@@ -14,6 +14,8 @@ router.register(r'relay_device', RelayForDeviceViewSet, basename='relay_device')
 router.register(r'value_sensor', SensorValueTypeViewSet, basename='value_sensor')
 
 router.register(r'time_device', TimeDefualtValueViewSet, basename='time_device')
+router.register(r'operators', OperatorsViewSet, basename='operators')
+router.register(r'validations_sensore', SensorDeviceValidationViewSet, basename='time_device')
 
 
 

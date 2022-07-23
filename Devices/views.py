@@ -18,6 +18,8 @@ from Devices.models import (
     RelayForDevice,
     TimeEnable,
     SensorValueType,
+    Operators,
+    SensorDeviceValidation,
 )
 from Devices.serializers import (
     DeviceSerializer,
@@ -28,6 +30,9 @@ from Devices.serializers import (
     RelaySerializer,
     TimeEnableSerializer,
     SensorValueTypeSerializer,
+    SensorDeviceValidationSerializer,
+    OperatorsSerializer,
+
 )
 from collections import Counter,defaultdict
 from django.core.exceptions import ObjectDoesNotExist
@@ -53,7 +58,18 @@ class DeviceViewSet(ModelViewSet):
         PinOfDevice(device=self.queryset.get(name=device.data.get("name"))).save()
         return device
     
-   
+
+class OperatorsViewSet(ModelViewSet):
+    queryset = Operators.objects.all()
+    serializer_class =  OperatorsSerializer
+    http_method_names = ['post' , 'get', 'delete', 'put']
+
+    
+class SensorDeviceValidationViewSet(ModelViewSet):
+    queryset = SensorDeviceValidation.objects.all()
+    serializer_class =  SensorDeviceValidationSerializer
+    http_method_names = ['post' , 'get', 'delete', 'put']
+
 
 class SensorViewSet(ModelViewSet):
     queryset = Sensor.objects.all()
@@ -162,7 +178,8 @@ class PinForDeviceViewSet(ModelViewSet):
             return Response({'error': f"Use the corresponding device sensors for all pins"}, status=status.HTTP_400_BAD_REQUEST)
         PinFdevice = super().update(request, *args, **kwargs)
         device=self.queryset.get(pk=kwargs["pk"]).device
-        PMI.send_message(device.auth.mac_addres,pin_and_sensor_of_device(device))
+        if device.auth.mac_addres is not None:
+            PMI.send_message(device.auth.mac_addres,pin_and_sensor_of_device(device))
         return PinFdevice
 
 

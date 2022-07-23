@@ -38,7 +38,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PinOfDevice',
             fields=[
-                ('device', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='Devices.device')),
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('device', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, unique=True, serialize=False, to='Devices.device')),
                 ('pin_number', models.IntegerField(default=10, editable=False)),
                 ('pin', models.JSONField(blank=True)),
             ],
