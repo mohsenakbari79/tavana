@@ -2,24 +2,32 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from Auth.models import AuthDevice
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from Auth.models import User 
 # Create your models here.
 
-
-class Device(models.Model):
-    user = models.ForeignKey("Auth.User",on_delete=models.CASCADE,related_name="device_user") 
+class DeviceModels(models.Model):
     name=models.CharField(max_length=50,blank=True,unique=True)
     versions=models.IntegerField(default=1,blank=True)
     release=models.FileField(upload_to ='release/',blank=True)
+
+class Device(models.Model):
+    name =models.CharField(max_length=50,blank=True)
+    deviceModel = models.ForeignKey("DeviceModels",on_delete=models.CASCADE,related_name="device_models")
+    user = models.ForeignKey("Auth.User",on_delete=models.CASCADE,related_name="device_user") 
     auth=models.OneToOneField("Auth.AuthDevice",on_delete=models.CASCADE)
     def save(self, *args, **kwargs):
         auth_device=AuthDevice()
         auth_device.save()
         self.auth=auth_device
         super(Device, self).save(*args, **kwargs)
-    
+
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name} :: Models({self.deviceModel.name})"
+
+    class Meta:
+        unique_together = ('name', 'deviceModel')
+
 class Operators(models.Model):
     TYPE_CHOICES = (
         ("NUM", "number"),
@@ -146,4 +154,10 @@ class TimeEnable(models.Model):
                     (time_check.start_time < d2.start_time < time_check.end_time) or (time_check.start_time < d2.end_time < time_check.end_time) or (d2.start_time <= time_check.start_time and d2.end_time >= time_check.end_time):
                     raise ValidationError()  
                 
-        super(TimeEnable, self).save(*args, **kwargs)    
+        super(TimeEnable, self).save(*args, **kwargs)   
+
+
+class TimeAction(models.Model):
+    crontab = models.OneToOneField(CrontabSchedule,on_delete=models.CASCADE)
+    relay = models.ForeignKey(RelayForDevice,on_delete=models.CASCADE)
+    enable = models.BooleanField(default=True)    

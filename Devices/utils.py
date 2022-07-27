@@ -132,7 +132,8 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
                         "measurement":device.name ,
                         "tags": {
                             "sensor":sensor_device.sensor.uniq_name,
-                            "sensor_value":sensor_device.pk
+                            "sensor_value":sensor_device.pk,
+                            "models":device.deviceModel.name
                             },
                         "time": datetime.now(),
                         "fields": {

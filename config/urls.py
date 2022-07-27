@@ -18,6 +18,8 @@ from django.urls import path,include,re_path
 from rest_framework_simplejwt import views as jwt_views
 from Auth.views import CustomConfirmEmailView
 from dj_rest_auth.views import PasswordResetConfirmView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -36,5 +38,5 @@ urlpatterns = [
     ),
     
 
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

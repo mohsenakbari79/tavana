@@ -11,19 +11,30 @@ from Devices.models import (
     SensorValueType,
     Operators,
     SensorDeviceValidation,
+    TimeAction,
 
 )
+from django_celery_beat.models import CrontabSchedule
+from timezone_field.rest_framework import TimeZoneSerializerField
+
+class DeviceModelsSerializer(serializers.ModelSerializer):
+    versions = serializers.IntegerField()
+    release = serializers.FileField()
+    class Meta:
+        model = Device
+        fields = ("name","versions","release",)
+    
+
 
 class DeviceSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
-    versions = serializers.IntegerField()
-    release = serializers.FileField( allow_null=True)
+    deviceModel=DeviceModelsSerializer()
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
     class Meta:
         model = Device
-        fields = ('pk','name','versions','release','user')
+        fields = ('pk','name','deviceModel','user')
     
 
 
@@ -41,6 +52,8 @@ class RelaySerializer(serializers.ModelSerializer):
         model = Relay
         fields = ('pk','uniq_name',)
 
+
+
 class PinSerializer(serializers.ModelSerializer):
     def get_device(self,obj):
         return {
@@ -55,13 +68,20 @@ class PinSerializer(serializers.ModelSerializer):
         fields = ('pk','device','pin_number','pin')
         read_only_fields = ["device"]
 
+class FilterDeviceWithUser(serializers.PrimaryKeyRelatedField):
+    def get_queryset(self):
+        user = self.context['request'].user
+        return Device.objects.filter(user=user)
+
 
 class SensorForDeviceSerializer(serializers.ModelSerializer):
+    device = FilterDeviceWithUser()
     class Meta:
         model = SensorForDevice
         fields = ('pk','device','sensor','enable',)
 
 class RelayForDeviceSerializer(serializers.ModelSerializer):
+    device = FilterDeviceWithUser()
     class Meta:
         model = RelayForDevice
         fields = ('pk','device','relay','enable',)
@@ -87,4 +107,28 @@ class SensorDeviceValidationSerializer(serializers.ModelSerializer):
     class Meta:
         model = SensorDeviceValidation
         fields = ('pk',"device_sensor","sort","senortype","relay","operator","operator_value","active")
+
+
+class CrontabScheduleSerializer(serializers.ModelSerializer):
+    timezone=TimeZoneSerializerField(use_pytz=False)
+    class Meta:
+        model = CrontabSchedule
+        fields = "__all__"
+
+class FilterRelayForeignKeyWithUser(serializers.PrimaryKeyRelatedField):
+    def get_queryset(self):
+        user = self.context['request'].user
+        return RelayForDevice.objects.filter(device__user=user)
+
+
+class TimeActionSerializer(serializers.ModelSerializer):
+    crontab = CrontabScheduleSerializer()
+    relay =FilterRelayForeignKeyWithUser()
+    class Meta:
+        model = TimeAction
+        fields = ("crontab","relay","enable")
+    def create(self, validated_data):
+        cron = CrontabSchedule.objects.create(**validated_data.pop('crontab'))
+        instance = TimeAction.objects.create(**validated_data,crontab=cron)
+        return instance
 

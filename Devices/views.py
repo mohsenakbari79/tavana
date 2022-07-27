@@ -20,6 +20,8 @@ from Devices.models import (
     SensorValueType,
     Operators,
     SensorDeviceValidation,
+    TimeAction,
+    DeviceModels,
 )
 from Devices.serializers import (
     DeviceSerializer,
@@ -32,6 +34,8 @@ from Devices.serializers import (
     SensorValueTypeSerializer,
     SensorDeviceValidationSerializer,
     OperatorsSerializer,
+    TimeActionSerializer,
+    DeviceModelsSerializer,
 
 )
 from collections import Counter,defaultdict
@@ -40,8 +44,27 @@ from rest_framework.response import Response
 from rest_framework import status
 from Devices.utils import redisclient,pin_and_sensor_of_device,ralay_for_device_update
 from rest_framework.permissions import IsAdminUser
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
+
 import json
 import asyncio
+
+class DeviceModelsViewSet(ModelViewSet):
+    queryset = DeviceModels.objects.all()
+    serializer_class = DeviceModelsSerializer
+    http_method_names = ['post', 'get', 'delete', 'put']
+    search_fields = ('hostname',)
+    def filter_queryset(self, queryset):
+        queryset = super().filter_queryset(queryset)
+        return queryset
+    def create(self, request, *args, **kwargs):
+        if self.queryset.filter(name=request.POST.get("name")).exists():
+            return Response({'error': f"name is uniq please not enter anouter name"}, status=status.HTTP_400_BAD_REQUEST)
+        device=super().create(request, *args, **kwargs)
+        PinOfDevice(device=self.queryset.get(name=device.data.get("name"))).save()
+        return device
+    
+
 
 class DeviceViewSet(ModelViewSet):
     queryset = Device.objects.all()
@@ -298,3 +321,15 @@ def sensorvalue(request,device,sensore=None):
         return Response({'error': f"not exit device or senore by id entered"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
+class TimeActionViewSet(ModelViewSet):
+    queryset = TimeAction.objects.all()
+    serializer_class =  TimeActionSerializer
+    http_method_names = ['post' , 'get', 'delete', 'put']
+    # permission_classes =(IsAdminUser,)
+    def filter_queryset(self, queryset):
+        queryset = super().filter_queryset(queryset)
+        queryset = queryset.filter(relay__device__user=self.request.user)
+        return queryset
+    

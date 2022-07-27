@@ -8,16 +8,28 @@ from Devices.models import (
     TimeEnable,
     Operators,
     SensorDeviceValidation,
+    TimeAction,
+    DeviceModels,
+    
 )
 # Register your models here.
 class DeviceCodesAdmin(admin.ModelAdmin):
     exclude = ('auth',)
 
+class DeviceModelsAdmin(admin.ModelAdmin):
+    list_display = ("name","versions")
+admin.site.register(DeviceModels,DeviceModelsAdmin)
+
+
 class DeviceAdmin(admin.ModelAdmin):
-    list_display = ("user_username","name","versions")
+    list_display = ("user_username","name")
     @admin.display(description='user name')
     def user_username(self, object):
         return object.user.username
+        
+    @admin.display(description='device models')
+    def deviceModel_name(self, object):
+        return object.deviceModel.name
 admin.site.register(Device,DeviceAdmin)
 
 class SensorAdmin(admin.ModelAdmin):
@@ -59,3 +71,9 @@ class SensorDeviceValidationAdmin(admin.ModelAdmin):
     def sensor_uniq_name(self, object):
         return object.device_sensor.senosr.uniq_name
 admin.site.register(SensorDeviceValidation,SensorDeviceValidationAdmin)
+
+
+
+
+
+admin.site.register(TimeAction)
