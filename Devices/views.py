@@ -61,7 +61,6 @@ class DeviceModelsViewSet(ModelViewSet):
         if self.queryset.filter(name=request.POST.get("name")).exists():
             return Response({'error': f"name is uniq please not enter anouter name"}, status=status.HTTP_400_BAD_REQUEST)
         device=super().create(request, *args, **kwargs)
-        PinOfDevice(device=self.queryset.get(name=device.data.get("name"))).save()
         return device
     
 

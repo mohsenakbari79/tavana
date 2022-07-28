@@ -12,6 +12,7 @@ from Devices.models import (
     Operators,
     SensorDeviceValidation,
     TimeAction,
+    DeviceModels,
 
 )
 from django_celery_beat.models import CrontabSchedule
@@ -21,14 +22,13 @@ class DeviceModelsSerializer(serializers.ModelSerializer):
     versions = serializers.IntegerField()
     release = serializers.FileField()
     class Meta:
-        model = Device
+        model = DeviceModels
         fields = ("name","versions","release",)
     
 
 
 class DeviceSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
-    deviceModel=DeviceModelsSerializer()
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
@@ -59,8 +59,8 @@ class PinSerializer(serializers.ModelSerializer):
         return {
             "pk":obj.device.pk,
             "name":obj.device.name,
-            "versions":obj.device.versions,
-        }
+            "model":obj.device.deviceModel.name
+                }
     device=serializers.SerializerMethodField("get_device")
     
     class Meta:
@@ -123,7 +123,7 @@ class FilterRelayForeignKeyWithUser(serializers.PrimaryKeyRelatedField):
 
 class TimeActionSerializer(serializers.ModelSerializer):
     crontab = CrontabScheduleSerializer()
-    relay =FilterRelayForeignKeyWithUser()
+    relay = FilterRelayForeignKeyWithUser()
     class Meta:
         model = TimeAction
         fields = ("crontab","relay","enable")
