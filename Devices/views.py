@@ -54,6 +54,8 @@ class DeviceModelsViewSet(ModelViewSet):
     serializer_class = DeviceModelsSerializer
     http_method_names = ['post', 'get', 'delete', 'put']
     search_fields = ('hostname',)
+    permission_classes =(IsAdminUser,)
+
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset)
         return queryset
