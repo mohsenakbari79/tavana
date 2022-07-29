@@ -15,7 +15,7 @@ from Devices.models import (
     DeviceModels,
 
 )
-from django_celery_beat.models import CrontabSchedule
+from django_celery_beat.models import CrontabSchedule,PeriodicTask
 from timezone_field.rest_framework import TimeZoneSerializerField
 
 class DeviceModelsSerializer(serializers.ModelSerializer):
@@ -115,20 +115,29 @@ class CrontabScheduleSerializer(serializers.ModelSerializer):
         model = CrontabSchedule
         fields = "__all__"
 
+class PeriodicTaskSerializer(serializers.ModelSerializer):
+    crontab = CrontabScheduleSerializer()
+    class Meta:
+        model = PeriodicTask
+        fields = ("name","crontab","task","enabled","one_off")
+    
 class FilterRelayForeignKeyWithUser(serializers.PrimaryKeyRelatedField):
     def get_queryset(self):
         user = self.context['request'].user
         return RelayForDevice.objects.filter(device__user=user)
 
 
+
+
 class TimeActionSerializer(serializers.ModelSerializer):
-    crontab = CrontabScheduleSerializer()
+    periodicTask = PeriodicTaskSerializer()
     relay = FilterRelayForeignKeyWithUser()
     class Meta:
         model = TimeAction
-        fields = ("crontab","relay","enable")
+        fields = ("name","periodicTask","relay","enabled")
     def create(self, validated_data):
         cron = CrontabSchedule.objects.create(**validated_data.pop('crontab'))
         instance = TimeAction.objects.create(**validated_data,crontab=cron)
         return instance
+
 

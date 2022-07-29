@@ -46,6 +46,7 @@ from Devices.utils import redisclient,pin_and_sensor_of_device,ralay_for_device_
 from rest_framework.permissions import IsAdminUser
 from Devices.permissions import IsAdminUserOrGet
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
+from celery import current_app
 
 import json
 import asyncio
@@ -335,3 +336,21 @@ class TimeActionViewSet(ModelViewSet):
         queryset = queryset.filter(relay__device__user=self.request.user)
         return queryset
     
+
+celery_app = current_app
+def tasks_as_choices():
+    print("celery_app",celery_app,"\n\n\n",celery_app.__dict__,"\n\n\n",celery_app.tasks,"\n\n\n")
+    tasks = list(sorted(name for name in celery_app.tasks
+                        if not name.startswith('celery.')))
+    tasts = json.dumps(tasks)
+    return tasts
+    
+
+@api_view(['GET', 'POST'])
+def tasksname(request):
+    try:
+        return Response(data=tasks_as_choices())
+    except Exception as e:
+        print("salam",e, e.__traceback__.tb_lineno )
+        return Response({'error': f"not exit device or senore by id entered"}, status=status.HTTP_400_BAD_REQUEST)
+

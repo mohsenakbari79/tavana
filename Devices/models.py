@@ -161,6 +161,6 @@ class TimeEnable(models.Model):
 
 
 class TimeAction(models.Model):
-    crontab = models.OneToOneField(CrontabSchedule,on_delete=models.CASCADE)
+    periodicTask = models.OneToOneField(PeriodicTask,on_delete=models.CASCADE)
     relay = models.ForeignKey(RelayForDevice,on_delete=models.CASCADE)
     enable = models.BooleanField(default=True)    
