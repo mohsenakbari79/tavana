@@ -3,7 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import api_view
-
+from datetime import timedelta
 # from rest_framework.views import APIView
 # from rest_framework.response import Response
 # from rest_framework import authentication, permissions
@@ -44,6 +44,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from Devices.utils import redisclient,pin_and_sensor_of_device,ralay_for_device_update
 from rest_framework.permissions import IsAdminUser
+from Devices.permissions import IsAdminUserOrGet
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 import json
@@ -54,7 +55,7 @@ class DeviceModelsViewSet(ModelViewSet):
     serializer_class = DeviceModelsSerializer
     http_method_names = ['post', 'get', 'delete', 'put']
     search_fields = ('hostname',)
-    permission_classes =(IsAdminUser,)
+    permission_classes =(IsAdminUserOrGet,)
 
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset)
@@ -88,7 +89,7 @@ class OperatorsViewSet(ModelViewSet):
     queryset = Operators.objects.all()
     serializer_class =  OperatorsSerializer
     http_method_names = ['post' , 'get', 'delete', 'put']
-    permission_classes =(IsAdminUser,)
+    permission_classes =(IsAdminUserOrGet,)
 
     
 class SensorDeviceValidationViewSet(ModelViewSet):
@@ -107,14 +108,14 @@ class SensorViewSet(ModelViewSet):
     serializer_class =  SensoreSerializer
     http_method_names = ['post', 'get', 'delete', 'put']
     search_fields = ('uniq_name',)
-    permission_classes =(IsAdminUser,)
+    permission_classes =(IsAdminUserOrGet,)
 
 class RelayViewSet(ModelViewSet):
     queryset = Relay.objects.all()
     serializer_class =  RelaySerializer
     http_method_names = ['post' , 'get', 'delete', 'put']
     search_fields = ('uniq_name',)
-    permission_classes =(IsAdminUser,)
+    permission_classes =(IsAdminUserOrGet,)
 
 class RelayForDeviceViewSet(ModelViewSet):
     queryset = RelayForDevice.objects.all()

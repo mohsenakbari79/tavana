@@ -23,7 +23,7 @@ class DeviceModelsSerializer(serializers.ModelSerializer):
     release = serializers.FileField()
     class Meta:
         model = DeviceModels
-        fields = ("name","versions","release",)
+        fields = ("pk","name","versions","release",)
     
 
 
