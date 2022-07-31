@@ -297,27 +297,35 @@ def sensorvalue(request,device,sensore=None):
 
         senosr_list=[]
         rs=redisclient.query(f"select * from {obj_device.name}")
-        respons ={"device":obj_device.name,"data":[]}
+        respons ={"device":obj_device.name,"data":{}}
         if sensore is not None:
-            senosr_list.append(list(rs.get_points(tags={"sensor_id": f"{sensore}"})))
+            senosr_list.extend(list(rs.get_points(tags={"sensor_id": f"{sensore}"})))
         else:
             senosr=obj_device.device_sensor.all()
             for sen in senosr:
-                templist=list(rs.get_points(tags={"sensor_id": f"{sen.pk}"}))
-                if 1==len(templist):
-                    senosr_list.append(templist)
-                elif 1<len(templist):
-                    all_value={
-                        "sensor_id":sen.pk,
-                        "data":[value["data"] for value in templist],
-                    }
-                    senosr_list.append(all_value)
+                print(rs.get_points(tags={"sensor_id": f"{sen.pk}"}))
+                senosr_list=senosr_list + list(rs.get_points(tags={"sensor_id": f"{sen.pk}"}))
+                    
         for value in senosr_list:
-            sensor=obj_device.device_sensor.get(sensor=value["sensor_id"]).sensor
-            respons["data"].append({
-                "sensore":sensor.uniq_name,
-                "value":value["data"],
-            })
+            tempjson={
+                        "sensor_id":value.pop('sensor_id',None),
+                        "time":value.pop('time',None),
+                        "models":value.pop('models',None),
+                        "sensor":value.pop('sensor',None),
+                        "data":value,
+                    }
+            sensor = obj_device.device_sensor.get(pk=tempjson["sensor_id"]).sensor
+            if tempjson["sensor_id"] is not None and tempjson["sensor_id"] not in respons["data"].keys() :
+                respons["data"][tempjson["sensor_id"]]= [{
+                    "time":tempjson['time'],
+                    "value":tempjson["data"],
+                }]  
+            else:
+                respons["data"][tempjson["sensor_id"]].append({
+                    "time":tempjson['time'],
+                    "value":tempjson["data"],
+                })
+
         return Response(data=respons)
     except Exception as e:
         print("salam",e, e.__traceback__.tb_lineno )

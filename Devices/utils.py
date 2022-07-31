@@ -46,50 +46,64 @@ def add_sensor_to_device(deviceid:int,listsernsor:list) ->bool:
         pass
 
 
-# def sensor_value(device:object,id_sensor:int,body:json):
+# def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
+#     valid_opreatour = {
+#         "eq": operator.eq,
+#         "gt": operator.gt,
+#         "lt": operator.lt,
+#         "ne": operator.ne,
+#         "ge": operator.ge,
+#         "le": operator.le,
+#     }
+#     valid_type={
+#         "NUM": float,
+#         "STR": str,
+#     }
 #     sensorvaluecheck=True
-#     sensor=device.device_sensor.get(pk=id_sensor).sensor
-#     sensor_vlaue=sensor.sensorvaluetype
-#     if sensor_vlaue.types == "STR":
+#     sensor_device=device.device_sensor.get(pk=int(id_sensor))
+#     sensor_values=sensor_device.sensor.sensorvaluetype_set.all().order_by("sort")
+#     len_device=sensor_values.count()
+#     for index,sensor_value in enumerate(sensor_values):
 #         json_payload = [] 
-#         for data in  body.get("data"):
-#             if data in sensor.validation.get("key_porblem",[]):
-#                 pass
-#             else: 
-#                 data = {
-#                     "measurement":device.name ,
-#                     "tags": {
-#                         "sensor":sensor.name,
-#                         "sensor_value":sensor.pk
-#                         },
-#                     "time": datetime.now(),
-#                     "fields": {
-#                         'data': data,
-#                     } 
+#         validation=sensor_device.sensorvalidation.filter(senortype=sensor_value)
+#         for data in  body.get("data",[])[index::len_device]:
+#             relay_action={
+#                         "type": "action",
+#                         "value": [],
+#                     }
+#             for valid in validation:
+#                 if valid_opreatour[valid.operator.operaror_name](
+#                     valid_type[valid.operator.operator_type](valid.operator_value),
+#                     valid_type[valid.operator.operator_type](data)
+#                     ):
+#                     relay_action["value"].append(
+#                                             {
+#                                                     "id":valid.relay.pk ,
+#                                                     "set": bool(valid.active),
+#                                             },
+#                                         )
+#             if relay_action["value"] is not None and len(relay_action["value"]) !=0:
+#                 PMI.send_message(str(device.auth.mac_addres),json.dumps(relay_action))      
+#             data_all = {
+#                         "measurement":device.name ,
+#                         "tags": {
+#                             "sensor":sensor_device.sensor.uniq_name,
+#                             "sensor_id":sensor_device.pk,
+#                             "models":device.deviceModel.name
+#                             },
+#                         "time": datetime.now(),
+#                         "fields": {
+#                             str(sensor_value.name): data,
+#                         } 
 
-#                 }
-#                 json_payload.append(data)
+#                     }
+            
+#             json_payload.append(data_all)
+#         redisclient.write_points(json_payload)
 
-#     elif sensor_vlaue.types == "INT":
-#         min_v = sensor.validation.get("min_value") if sensor.validation.get("min_value").isdigit() else float("-inf")
-#         max_v = sensor.validation.get("max_value") if sensor.validation.get("max_value").isdigit() else float("inf")
-#         for data in  body.get("data"): 
-#             if  min_v< data < max_v :
-#                 data = {
-#                     "measurement":device.name ,
-#                     "tags": {
-#                         "sensor_id":sensor_vlaue.pk
-#                         },
-#                     "time": datetime.now(),
-#                     "fields": {
-#                         'data': data,
-#                     } 
 
-#                 }
-#                 json_payload.append(data)
-#             else:
-#                 pass
-#     redisclient.write_points(json_payload)
+
+ 
 def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
     valid_opreatour = {
         "eq": operator.eq,
@@ -107,10 +121,13 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
     sensor_device=device.device_sensor.get(pk=int(id_sensor))
     sensor_values=sensor_device.sensor.sensorvaluetype_set.all().order_by("sort")
     len_device=sensor_values.count()
-    for index,sensor_value in enumerate(sensor_values):
+    i_data=0
+    data=body.get("data",[])
+    while i_data<len(data):
         json_payload = [] 
-        for data in  body.get("data",[])[index::len_device]:
-            validation=sensor_device.sensorvalidation.filter(senortype=sensor_value)
+        validation=sensor_device.sensorvalidation.filter(senortype=sensor_value)
+        data_all={}
+        for index,sensor_value in enumerate(sensor_values):
             relay_action={
                         "type": "action",
                         "value": [],
@@ -127,23 +144,22 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
                                             },
                                         )
             if relay_action["value"] is not None and len(relay_action["value"]) !=0:
-                PMI.send_message(str(device.auth.mac_addres),json.dumps(relay_action))      
-            data = {
-                        "measurement":device.name ,
-                        "tags": {
-                            "sensor":sensor_device.sensor.uniq_name,
-                            "sensor_value":sensor_device.pk,
-                            "models":device.deviceModel.name
-                            },
-                        "time": datetime.now(),
-                        "fields": {
-                            str(sensor_value.name): data,
-                        } 
-
-                    }
+                PMI.send_message(str(device.auth.mac_addres),json.dumps(relay_action))
+            data_all[str(sensor_value.name)]=data[i_data]  
+            i_data+=1 
+        data_compelit = {
+                    "measurement":device.name ,
+                    "tags": {
+                        "sensor":sensor_device.sensor.uniq_name,
+                        "sensor_id":sensor_device.pk,
+                        "models":device.deviceModel.name
+                        },
+                    "time": datetime.now(),
+                    "fields": data_all
+                }
             
-            json_payload.append(data)
-        redisclient.write_points(json_payload)
+        json_payload.append(data_compelit)
+    redisclient.write_points(json_payload)
 
 
 

@@ -25,7 +25,7 @@ router.register(r'time_action', TimeActionViewSet, basename='time_action')
 
 urlpatterns = [
 	path('api/', include(router.urls)),
-	path('api/sensor/value/<str:device>',sensorvalue,name="senosrvalue"),
-	path('api/sensor/value/<str:device>/<str:sensore>',sensorvalue,name="senosrvalueall"),
+	path('api/value/sensor/<str:device>',sensorvalue,name="senosrvalue"),
+	path('api/value/sensor/<str:device>/<str:sensore>',sensorvalue,name="senosrvalueall"),
 	path('api/tasksname/',tasksname,name="tasksname"),
 ]
