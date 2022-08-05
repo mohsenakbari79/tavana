@@ -131,6 +131,17 @@ class RelayForDeviceViewSet(ModelViewSet):
         relay.enable = False
         relay.save()
         return result
+
+    def destroy(self, request, *args, **kwargs):
+        relay = RelayForDevice.objects.get(pk=kwargs["pk"])
+        device_pin = relay.device.pinofdevice
+        relay_id = "relay_" +str(relay.pk)
+        if relay_id in device_pin.pin.values():
+            for pin_pk, relay_pk in device_pin.pin.items():  # for name, age in dictionary.iteritems():  (for Python 2.x)
+                if relay_pk == relay_id:
+                    device_pin.pin[pin_pk]=None
+            device_pin.save()
+        return super().destroy(request, *args, **kwargs)
     def update(self, request, *args, **kwargs):
         result=  super().update(request, *args, **kwargs)
         device=self.queryset.get(pk=kwargs["pk"]).device
@@ -171,6 +182,17 @@ class SensorForDeviceViewSet(ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
+        sensor = SensorForDevice.objects.get(pk=kwargs["pk"])
+        device_pin = sensor.device.pinofdevice
+        sensor_id = "sensor_" +str(sensor.pk)
+        print("\n\n\n\n\n Amad TO TABE no if")
+        if sensor_id in device_pin.pin.values():
+            print("\n\n\n\n\n Amad TO TABE")
+            for pin_pk, sensor_pk in device_pin.pin.items():  # for name, age in dictionary.iteritems():  (for Python 2.x)
+                print("\n\n\n\n\n ",pin_pk, sensor_pk)
+                if sensor_pk == sensor_id:   
+                    device_pin.pin[pin_pk]=None
+            device_pin.save()
         return super().destroy(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
@@ -219,6 +241,7 @@ class PinForDeviceViewSet(ModelViewSet):
                     key=str(key)
                     split_key=key.split("_")
                     sensor =None
+                    relay =None
                     if split_key[0] not in ["sensor","relay"]:
                         return Response({'error': f"A sensor {key} not good format (sensor_pk | relay_pk) "}, status=status.HTTP_400_BAD_REQUEST)
                     if split_key[0]=="sensor":
@@ -227,7 +250,7 @@ class PinForDeviceViewSet(ModelViewSet):
                         relay = device.device_relay.get(pk=split_key[1]).relay
                     if sensor != None and value != sensor.pin_number :
                         return Response({'error': f"A sensor {sensor.uniq_name} has {sensor.pin_number} pins while you have given {sensor}"}, status=status.HTTP_400_BAD_REQUEST)
-                    elif value != 1:
+                    elif relay !=None and value != 1:
                         return Response({'error': f"A relay can just one pins"}, status=status.HTTP_400_BAD_REQUEST)
         except ObjectDoesNotExist:
             return Response({'error': f"Use the corresponding device sensors for all pins"}, status=status.HTTP_400_BAD_REQUEST)
