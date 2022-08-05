@@ -378,7 +378,8 @@ def get_device_token(request,device_id):
         device = Device.objects.get(pk=device_id)
         if  request.user == device.user:
             return Response(data={"auth_token":str(device.auth.token)})
+        else:
+            return Response(data={"error":"not accsses to get token for entered device"})
     except Exception as e:
-        print("salam",e, e.__traceback__.tb_lineno )
-        return Response({'error': f"not exit device or senore by id entered"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': f"not exit device  by id entered"}, status=status.HTTP_400_BAD_REQUEST)
 
