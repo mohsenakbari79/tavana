@@ -15,7 +15,6 @@ router.register(r'sensor_device', SensorForDeviceViewSet, basename='sensor_devic
 router.register(r'relay_device', RelayForDeviceViewSet, basename='relay_device')
 router.register(r'value_sensor', SensorValueTypeViewSet, basename='value_sensor')
 
-router.register(r'time_device', TimeDefualtValueViewSet, basename='time_device')
 router.register(r'operators', OperatorsViewSet, basename='operators')
 router.register(r'validations_sensore', SensorDeviceValidationViewSet, basename='validation_device')
 
@@ -28,4 +27,7 @@ urlpatterns = [
 	path('api/value/sensor/<str:device>',sensorvalue,name="senosrvalue"),
 	path('api/value/sensor/<str:device>/<str:sensore>',sensorvalue,name="senosrvalueall"),
 	path('api/tasksname/',tasksname,name="tasksname"),
+	path('api/gettoken/<str:device_id>',get_device_token,name="getdevicetoken"),
+
+	
 ]

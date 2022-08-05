@@ -5,13 +5,13 @@ from Devices.models import (
     Sensor,
     PinOfDevice,
     SensorForDevice,
-    TimeEnable,
+    # TimeEnable,
     RelayForDevice,
     Relay,
     SensorValueType,
     Operators,
     SensorDeviceValidation,
-    TimeAction,
+    # TimeAction,
     DeviceModels,
 
 )
@@ -92,10 +92,6 @@ class SensorValueTypeSerializer(serializers.ModelSerializer):
         fields = ('pk','sensor','sort','name','types')
 
 
-class TimeEnableSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TimeEnable
-        fields = ('pk','sensorfordevice','start_day','end_day','start_time','end_time')
 
 class OperatorsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -119,8 +115,12 @@ class PeriodicTaskSerializer(serializers.ModelSerializer):
     crontab = CrontabScheduleSerializer()
     class Meta:
         model = PeriodicTask
-        fields = ("name","crontab","task","enabled","one_off")
-    
+        fields = ("name","crontab","task","args","enabled","one_off")
+    def create(self, validated_data):
+        Crontab = CrontabSchedule.objects.create(**validated_data.pop('crontab'))
+        instance=PeriodicTask.objects.create(**validated_data,crontab=Crontab)
+        return instance
+
 class FilterRelayForeignKeyWithUser(serializers.PrimaryKeyRelatedField):
     def get_queryset(self):
         user = self.context['request'].user
@@ -129,15 +129,6 @@ class FilterRelayForeignKeyWithUser(serializers.PrimaryKeyRelatedField):
 
 
 
-class TimeActionSerializer(serializers.ModelSerializer):
-    periodicTask = PeriodicTaskSerializer()
-    relay = FilterRelayForeignKeyWithUser()
-    class Meta:
-        model = TimeAction
-        fields = ("name","periodicTask","relay","enabled")
-    def create(self, validated_data):
-        cron = CrontabSchedule.objects.create(**validated_data.pop('crontab'))
-        instance = TimeAction.objects.create(**validated_data,crontab=cron)
-        return instance
+
 
 

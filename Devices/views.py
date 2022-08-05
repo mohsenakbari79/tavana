@@ -16,11 +16,9 @@ from Devices.models import (
     PinOfDevice,
     SensorForDevice,
     RelayForDevice,
-    TimeEnable,
     SensorValueType,
     Operators,
     SensorDeviceValidation,
-    TimeAction,
     DeviceModels,
 )
 from Devices.serializers import (
@@ -30,12 +28,11 @@ from Devices.serializers import (
     SensorForDeviceSerializer,
     RelayForDeviceSerializer,
     RelaySerializer,
-    TimeEnableSerializer,
     SensorValueTypeSerializer,
     SensorDeviceValidationSerializer,
     OperatorsSerializer,
-    TimeActionSerializer,
     DeviceModelsSerializer,
+    PeriodicTaskSerializer,
 
 )
 from collections import Counter,defaultdict
@@ -128,12 +125,24 @@ class RelayForDeviceViewSet(ModelViewSet):
         queryset = queryset.filter(device__user=self.request.user)
         return queryset
 
+    def create(self, request, *args, **kwargs):
+        result = super().create(request, *args, **kwargs)
+        relay = self.queryset.get(pk=result.data["pk"])
+        relay.enable = False
+        relay.save()
+        return result
     def update(self, request, *args, **kwargs):
         result=  super().update(request, *args, **kwargs)
-        relay=self.queryset.get(pk=kwargs["pk"]).device
+        device=self.queryset.get(pk=kwargs["pk"]).device
+        relay=self.queryset.get(pk=kwargs["pk"])
         answer =ralay_for_device_update(relay,device)
         if answer[0] == True:
             PMI.send_message(device.auth.mac_addres,answer[1])
+        else:
+            relay.enable = False
+            relay.save()  
+            return Response({"error":"You cannot activate a relay that you did not enter in the pins "},
+                                status=status.HTTP_400_BAD_REQUEST)
         return result
 class SensorValueTypeViewSet(ModelViewSet):
     queryset = SensorValueType.objects.all()
@@ -230,31 +239,31 @@ class PinForDeviceViewSet(ModelViewSet):
 
 
 
-class TimeDefualtValueViewSet(ModelViewSet):
-    queryset = TimeEnable.objects.all()
-    serializer_class =  TimeEnableSerializer
-    http_method_names = ['post' , 'get', 'delete', 'put']
-    # search_fields = ('uniq_name')
+# class TimeDefualtValueViewSet(ModelViewSet):
+#     queryset = TimeEnable.objects.all()
+#     serializer_class =  TimeEnableSerializer
+#     http_method_names = ['post' , 'get', 'delete', 'put']
+#     # search_fields = ('uniq_name')
 
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
+#     def __init__(self, **kwargs) -> None:
+#         super().__init__(**kwargs)
 
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+#     def list(self, request, *args, **kwargs):
+#         return super().list(request, *args, **kwargs)
 
-    def update(self, request, *args, **kwargs):
-        all_time=self.queryset.filter(sensorfordevice=kwargs["sensorfordevice"])
-        if (kwargs["end_day"] != None and kwargs["start_day"] < kwargs["end_day"]) or (kwargs["end_time"] != None and kwargs["start_time"] < kwargs["end_time"]):
-            pass
-        for time_check in all_time:          
-            if kwargs["start_day"] != None and kwargs["end_day"] != None and\
-                    time_check.start_day != None and time_check.start_day != None and  \
-                    (time_check.start_day < d2.start_day < time_check.end_day) or (time_check.start_day < d2.end_day < time_check.end_day) or (d2.start_day <= time_check.start_day and d2.end_day >= time_check.end_day):       
-                if kwargs["start_time"] != None and kwargs["end_time"] != None and\
-                    time_check.start_time != None and time_check.start_time != None and  \
-                    (time_check.start_time < d2.start_time < time_check.end_time) or (time_check.start_time < d2.end_time < time_check.end_time) or (d2.start_time <= time_check.start_time and d2.end_time >= time_check.end_time):
-                    raise ValidationError()  
-        return super().update(request, *args, **kwargs)
+#     def update(self, request, *args, **kwargs):
+#         all_time=self.queryset.filter(sensorfordevice=kwargs["sensorfordevice"])
+#         if (kwargs["end_day"] != None and kwargs["start_day"] < kwargs["end_day"]) or (kwargs["end_time"] != None and kwargs["start_time"] < kwargs["end_time"]):
+#             pass
+#         for time_check in all_time:          
+#             if kwargs["start_day"] != None and kwargs["end_day"] != None and\
+#                     time_check.start_day != None and time_check.start_day != None and  \
+#                     (time_check.start_day < d2.start_day < time_check.end_day) or (time_check.start_day < d2.end_day < time_check.end_day) or (d2.start_day <= time_check.start_day and d2.end_day >= time_check.end_day):       
+#                 if kwargs["start_time"] != None and kwargs["end_time"] != None and\
+#                     time_check.start_time != None and time_check.start_time != None and  \
+#                     (time_check.start_time < d2.start_time < time_check.end_time) or (time_check.start_time < d2.end_time < time_check.end_time) or (d2.start_time <= time_check.start_time and d2.end_time >= time_check.end_time):
+#                     raise ValidationError()  
+#         return super().update(request, *args, **kwargs)
     
 
 
@@ -335,14 +344,14 @@ def sensorvalue(request,device,sensore=None):
 
 
 class TimeActionViewSet(ModelViewSet):
-    queryset = TimeAction.objects.all()
-    serializer_class =  TimeActionSerializer
+    queryset = PeriodicTask.objects.all()
+    serializer_class =  PeriodicTaskSerializer
     http_method_names = ['post' , 'get', 'delete', 'put']
     # permission_classes =(IsAdminUser,)
-    def filter_queryset(self, queryset):
-        queryset = super().filter_queryset(queryset)
-        queryset = queryset.filter(relay__device__user=self.request.user)
-        return queryset
+    # def filter_queryset(self, queryset):
+    #     queryset = super().filter_queryset(queryset)
+    #     queryset = queryset.filter(relay__device__user=self.request.user)
+    #     return queryset
     
 
 celery_app = current_app
@@ -358,6 +367,17 @@ def tasks_as_choices():
 def tasksname(request):
     try:
         return Response(data=tasks_as_choices())
+    except Exception as e:
+        print("salam",e, e.__traceback__.tb_lineno )
+        return Response({'error': f"not exit device or senore by id entered"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'POST'])
+def get_device_token(request,device_id):
+    try:
+        device = Device.objects.get(pk=device_id)
+        if  request.user == device.user:
+            return Response(data={"auth_token":str(device.auth.token)})
     except Exception as e:
         print("salam",e, e.__traceback__.tb_lineno )
         return Response({'error': f"not exit device or senore by id entered"}, status=status.HTTP_400_BAD_REQUEST)

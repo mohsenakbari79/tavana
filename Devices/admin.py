@@ -5,10 +5,10 @@ from Devices.models import (
     SensorForDevice,
     PinOfDevice,
     SensorValueType,
-    TimeEnable,
+    # TimeEnable,
     Operators,
     SensorDeviceValidation,
-    TimeAction,
+    # TimeAction,
     DeviceModels,
     
 )
@@ -54,9 +54,9 @@ class SensorValueTypeAdmin(admin.ModelAdmin):
         return object.sensor.uniq_name
 admin.site.register(SensorValueType,SensorValueTypeAdmin)
 
-class TimeEnableTypeAdmin(admin.ModelAdmin):
-    list_display = ("start_day","end_day","start_time","end_time")
-admin.site.register(TimeEnable,TimeEnableTypeAdmin)
+# class TimeEnableTypeAdmin(admin.ModelAdmin):
+#     list_display = ("start_day","end_day","start_time","end_time")
+# admin.site.register(TimeEnable,TimeEnableTypeAdmin)
 
 
 
@@ -76,4 +76,4 @@ admin.site.register(SensorDeviceValidation,SensorDeviceValidationAdmin)
 
 
 
-admin.site.register(TimeAction)
+# admin.site.register(TimeAction)

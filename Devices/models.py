@@ -62,6 +62,8 @@ class Sensor(models.Model):
 
 class Relay(models.Model):
     uniq_name = models.CharField(max_length=25)
+    def __str__(self):
+        return f"{self.uniq_name}"
 
 class RelayForDevice(models.Model):
     id = models.AutoField(primary_key=True)
@@ -137,30 +139,3 @@ class PinOfDevice(models.Model):
     @property
     def pin_dict(self):
         return simplejson.loads(self.pin)
-
-class TimeEnable(models.Model):
-    sensorfordevice=models.ForeignKey("SensorForDevice",on_delete=models.CASCADE,related_name="time_enable")
-    start_day=models.DateField(null=True,blank=True)
-    end_day=models.DateField(blank=True)
-    start_time=models.TimeField(blank=True)
-    end_time=models.TimeField(blank=True)
-    def save(self, *args, **kwargs):
-        all_time=TimeEnable.objects.filter(sensorfordevice=self.sensorfordevice)
-        if (self.end_day != None and self.start_day < self.end_day) or (self.end_time != None and self.start_time < self.end_time):
-            pass
-        for time_check in all_time:          
-            if self.start_day != None and self.end_day != None and\
-                    time_check.start_day != None and time_check.start_day != None and  \
-                    (time_check.start_day < d2.start_day < time_check.end_day) or (time_check.start_day < d2.end_day < time_check.end_day) or (d2.start_day <= time_check.start_day and d2.end_day >= time_check.end_day):       
-                if self.start_time != None and self.end_time != None and\
-                    time_check.start_time != None and time_check.start_time != None and  \
-                    (time_check.start_time < d2.start_time < time_check.end_time) or (time_check.start_time < d2.end_time < time_check.end_time) or (d2.start_time <= time_check.start_time and d2.end_time >= time_check.end_time):
-                    raise ValidationError()  
-                
-        super(TimeEnable, self).save(*args, **kwargs)   
-
-
-class TimeAction(models.Model):
-    periodicTask = models.OneToOneField(PeriodicTask,on_delete=models.CASCADE)
-    relay = models.ForeignKey(RelayForDevice,on_delete=models.CASCADE)
-    enable = models.BooleanField(default=True)    
