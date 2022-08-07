@@ -5,6 +5,7 @@ from Devices.models import Device
 
 @shared_task(name="enable")
 def mytaskenable(device_id,relay_pin):
+    print("device_id,relay_pin",device_id,relay_pin)
     if "relay" not in relay_pin and relay_pin.isdigit():
         relay_pin= "relay_"+relay_pin
     device = Device.objects.get(pk=device_id)
@@ -17,6 +18,7 @@ def mytaskenable(device_id,relay_pin):
                 }
             ]
         }
+    print("device.auth.mac_addres",device.auth.mac_addres,relay_action)
     PMI.send_message(str(device.auth.mac_addres),json.dumps(relay_action))
 
 
