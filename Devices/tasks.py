@@ -12,6 +12,7 @@ def mytaskenable(device_id,relay_pin):
     if "relay" not in relay_pin and relay_pin.isdigit():
         relay_pin= "relay_"+str(relay_pin)
     device = Device.objects.get(pk=device_id)
+    print(config('HOSTSERVER'))
     relay_action={
             "type": "Action",
             "value": [
