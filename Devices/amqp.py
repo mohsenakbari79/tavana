@@ -5,7 +5,7 @@ import json
 import threading
 from Auth.models import AuthDevice
 # from Devices.models import Device,SensorForDevice,Sensor
-from Devices.utils import add_sensor_to_device,add_sensor,sensor_value,pin_and_sensor_of_device
+from Devices.utils import add_sensor_to_device,add_sensor,sensor_value_get,pin_and_sensor_of_device
 # client = redis.Redis(host='localhost', port=6379, db=0)
 # result = client.json().get('somejson:1')
 
@@ -27,7 +27,7 @@ def callback(ch, method, properties, body):
                 id_sensor = body.get('id',None)
                 if id_sensor is not None :
                     sensor = id_sensor.split("_")[1]
-                    sensor_value(PMI,device,sensor,body)
+                    sensor_value_get(PMI,device,sensor,body)
             elif swich == "Sensors_request":
                 temp=pin_and_sensor_of_device(device)
                 PMI.send_message(method.routing_key,temp)

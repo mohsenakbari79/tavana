@@ -104,7 +104,7 @@ def add_sensor_to_device(deviceid:int,listsernsor:list) ->bool:
 
 
  
-def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
+def sensor_value_get(PMI:object,device:object,id_sensor:int,body:json):
     valid_opreatour = {
         "eq": operator.eq,
         "gt": operator.gt,
@@ -125,9 +125,9 @@ def sensor_value(PMI:object,device:object,id_sensor:int,body:json):
     data=body.get("data",[])
     while i_data<len(data):
         json_payload = [] 
-        validation=sensor_device.sensorvalidation.filter(senortype=sensor_value)
         data_all={}
         for index,sensor_value in enumerate(sensor_values):
+            validation=sensor_device.sensorvalidation.filter(senortype=sensor_value)
             relay_action={
                         "type": "action",
                         "value": [],
