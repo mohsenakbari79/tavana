@@ -322,7 +322,7 @@ class PinForDeviceViewSet(ModelViewSet):
 
 
 
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
 def sensorvalue(request,device,sensore=None):
     try:
         obj_device = Device.objects.get(name=device)
@@ -386,7 +386,7 @@ def tasks_as_choices():
     return tasts
     
 
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
 def tasksname(request):
     try:
         return Response(data=tasks_as_choices())
@@ -395,7 +395,7 @@ def tasksname(request):
         return Response({'error': f"not exit device or senore by id entered"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
 def get_device_token(request,device_id):
     try:
         device = Device.objects.get(pk=device_id)

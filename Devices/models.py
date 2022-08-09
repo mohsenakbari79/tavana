@@ -110,8 +110,8 @@ class SensorDeviceValidation(models.Model):
     operator = models.ForeignKey("Operators",on_delete=models.CASCADE)
     operator_value = models.CharField(max_length=40)
     CHOISE_FIELD = (
-        (0 , "enable"),
-        (1 , "disable"),
+        (1 , "enable"),
+        (0 , "disable"),
     )
     active = models.IntegerField(default=0,choices=CHOISE_FIELD)
     # def save(self, *args, **kwargs):

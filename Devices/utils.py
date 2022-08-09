@@ -134,8 +134,8 @@ def sensor_value_get(PMI:object,device:object,id_sensor:int,body:json):
                     }
             for valid in validation:
                 if valid_opreatour[valid.operator.operaror_name](
-                    valid_type[valid.operator.operator_type](valid.operator_value),
-                    valid_type[valid.operator.operator_type](data[i_data])
+                    valid_type[valid.operator.operator_type](data[i_data]),
+                    valid_type[valid.operator.operator_type](valid.operator_value)
                     ):
                     relay_action["value"].append(
                                             {
