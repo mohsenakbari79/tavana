@@ -18,7 +18,6 @@ def mytaskenable(device_id,relay_pin):
                 }
             ]
         }
-    print("device.auth.mac_addres",device.auth.mac_addres,relay_action)
     PMI.send_message(str(device.auth.mac_addres),json.dumps(relay_action))
 
 
