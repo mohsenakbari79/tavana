@@ -5,7 +5,6 @@ from Devices.models import Device
 
 @shared_task(name="enable")
 def mytaskenable(device_id,relay_pin):
-    print("device_id,relay_pin",device_id,relay_pin)
     if relay_pin.isdigit() or "relay" not in relay_pin:
         relay_pin= "relay_"+str(relay_pin)
     device = Device.objects.get(pk=device_id)
