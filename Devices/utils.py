@@ -123,8 +123,8 @@ def sensor_value_get(PMI:object,device:object,id_sensor:int,body:json):
     len_device=sensor_values.count()
     i_data=0
     data=body.get("data",[])
+    json_payload = []
     while i_data<len(data):
-        json_payload = [] 
         data_all={}
         for index,sensor_value in enumerate(sensor_values):
             validation=sensor_device.sensorvalidation.filter(senortype=sensor_value)
@@ -145,7 +145,7 @@ def sensor_value_get(PMI:object,device:object,id_sensor:int,body:json):
                                         )
             if relay_action["value"] is not None and len(relay_action["value"]) !=0:
                 PMI.send_message(str(device.auth.mac_addres),json.dumps(relay_action))
-            data_all[str(sensor_value.name)]=data[i_data]  
+            data_all[str(sensor_value.name)] = data[i_data]  
             i_data+=1 
         data_compelit = {
                     "measurement":device.name ,

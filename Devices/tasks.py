@@ -6,8 +6,8 @@ from Devices.models import Device
 @shared_task(name="enable")
 def mytaskenable(device_id,relay_pin):
     print("device_id,relay_pin",device_id,relay_pin)
-    if "relay" not in relay_pin and relay_pin.isdigit():
-        relay_pin= "relay_"+relay_pin
+    if relay_pin.isdigit() or "relay" not in relay_pin:
+        relay_pin= "relay_"+str(relay_pin)
     device = Device.objects.get(pk=device_id)
     relay_action={
             "type": "Action",
@@ -24,8 +24,8 @@ def mytaskenable(device_id,relay_pin):
 
 @shared_task(name="disable")
 def mytaskenable(device_id,relay_pin):
-    if "relay" not in relay_pin and relay_pin.isdigit():
-        relay_pin= "relay_"+relay_pin
+    if relay_pin.isdigit() or "relay" not in relay_pin:
+        relay_pin= "relay_"+str(relay_pin)
     device = Device.objects.get(pk=device_id)
     relay_action={
             "type": "Action",

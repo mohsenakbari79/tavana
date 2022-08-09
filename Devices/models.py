@@ -46,6 +46,8 @@ class Operators(models.Model):
         ("le", "lower and equal"),
     )
     operaror_name = models.CharField(max_length=2,choices=NAME_CHOICES)
+    def __str__(self):
+        return f"{self.operator_type}-{self.operaror_name}"
     class Meta:
         unique_together = ('operator_type', 'operaror_name')
 
@@ -112,8 +114,8 @@ class SensorDeviceValidation(models.Model):
         (1 , "disable"),
     )
     active = models.IntegerField(default=0,choices=CHOISE_FIELD)
-    def save(self, *args, **kwargs):
-        super(SensorValueType, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     super(SensorDeviceValidation, self).save(*args, **kwargs)
     def __str__(self):
         return f"{self.device_sensor.device.name} - {self.device_sensor.sensor.uniq_name}"
     
