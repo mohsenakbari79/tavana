@@ -14,4 +14,5 @@ ADD requirements.txt /giahino
 COPY . /giahino/
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+CMD ["celery -A config worker --loglevel=debug --scheduler django_celery_beat.schedulers:DatabaseScheduler","celery -A config beat --loglevel=debug --scheduler django_celery_beat.schedulers:DatabaseScheduler"]
 # RUN python manage.py collectstatic --no-input
