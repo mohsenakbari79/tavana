@@ -325,7 +325,10 @@ class PinForDeviceViewSet(ModelViewSet):
 @api_view(['GET'])
 def sensorvalue(request,device,sensore=None):
     try:
-        obj_device = Device.objects.get(name=device)
+        if device.isdigit():
+            obj_device = Device.objects.get(pk=device)
+        else:
+            obj_device = Device.objects.get(name=device)
 
         senosr_list=[]
         rs=redisclient.query(f"select * from {obj_device.name}")
