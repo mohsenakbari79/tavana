@@ -145,7 +145,7 @@ def sensor_value_get(PMI:object,device:object,id_sensor:int,body:json):
                                         )
             if relay_action["value"] is not None and len(relay_action["value"]) !=0:
                 PMI.send_message(str(device.auth.mac_addres),json.dumps(relay_action))
-            data_all[str(sensor_value.name)] = data[i_data] if not data[i_data].isdigit() else float(data[i_data])
+            data_all[str(sensor_value.name)] = data[i_data] if not str(data[i_data]).isdigit() else float(data[i_data])
             i_data+=1 
         data_compelit = {
                     "measurement":device.name ,
