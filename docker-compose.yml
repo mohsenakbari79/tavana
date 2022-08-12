@@ -18,8 +18,7 @@ services:
       - "8000:8000"
     depends_on:
       - db
-      - celery
-      - celery-beat
+      - redis 
       - rabbitmq
       
     networks:
@@ -73,27 +72,12 @@ services:
    
   redis:
     image: redis:alpine
-    networks:
-        - web_network
     ports:
-        - 6379:6379
-
-
-  celery:
-    build: .
-    command: celery -A config worker --loglevel=debug --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    depends_on:
-      - redis
+      - 6379
     networks:
-        - web_network
+      - web_network
 
-  celery-beat:
-    build: .
-    command: celery -A config beat --loglevel=debug --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    depends_on:
-      - redis
-    networks:
-        - web_network
+
 
   rabbitmq:
     build:
