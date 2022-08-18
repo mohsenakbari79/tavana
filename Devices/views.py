@@ -44,7 +44,7 @@ from rest_framework.permissions import IsAdminUser
 from Devices.permissions import IsAdminUserOrGet
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from celery import current_app
-
+from rest_framework.decorators import authentication_classes, permission_classes
 import json
 import asyncio
 
@@ -408,4 +408,28 @@ def get_device_token(request,device_id):
             return Response(data={"error":"not accsses to get token for entered device"})
     except Exception as e:
         return Response({'error': f"not exit device  by id entered"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def run_task_action(request):
+    try:
+        device = Device.objects.get(pk=request.POST.get("device_id"))
+        relay_action={
+            "type": "Action",
+            "value": [
+                {
+                "id": request.POST.get("relay_pin"),
+                "set": True if "True" in request.POST.get("status") else False,
+                }
+            ]
+        }
+        print("\n\n\n",str(device.auth.mac_addres),json.dumps(relay_action))
+        PMI.send_message(str(device.auth.mac_addres),json.dumps(relay_action))
+        return Response(data={"status":"ok",})
+    except Exception as e:
+        return Response({'error': f"not exit device  by id entered"}, status=status.HTTP_400_BAD_REQUEST)
+
 

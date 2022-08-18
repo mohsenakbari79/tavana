@@ -7,7 +7,7 @@ services:
     container_name: giahino
     command: >
       sh -c "python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
+             python manage.py runserver 0.0.0.0:8000 & celery -A config beat --loglevel=debug --scheduler django_celery_beat.schedulers:DatabaseScheduler & celery -A config worker --loglevel=debug --scheduler django_celery_beat.schedulers:DatabaseScheduler"
     # volumes:
       # - .:/giahino
       # - web_static_volume:/giahino/static/
@@ -18,8 +18,6 @@ services:
       - "8000:8000"
     depends_on:
       - db
-      - celery
-      - celery-beat
       - rabbitmq
       
     networks:
@@ -76,24 +74,9 @@ services:
     networks:
         - web_network
     ports:
-        - 6379:6379
+        - 6379
 
 
-  celery:
-    build: .
-    command: celery -A config worker --loglevel=debug --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    depends_on:
-      - redis
-    networks:
-        - web_network
-
-  celery-beat:
-    build: .
-    command: celery -A config beat --loglevel=debug --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    depends_on:
-      - redis
-    networks:
-        - web_network
 
   rabbitmq:
     build:
