@@ -78,7 +78,7 @@ class SensorForDeviceSerializer(serializers.ModelSerializer):
     device = FilterDeviceWithUser()
     class Meta:
         model = SensorForDevice
-        fields = ('pk','device','sensor','enable',)
+        fields = ('pk','device','sensor','sampleDuration','enable')
 
 class RelayForDeviceSerializer(serializers.ModelSerializer):
     device = FilterDeviceWithUser()

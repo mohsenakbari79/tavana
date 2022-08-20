@@ -233,18 +233,21 @@ def pin_and_sensor_of_device(device:object):
     for sensor_rele ,value in res.items():
         splitsensor_rele=sensor_rele.split("_")
         if splitsensor_rele[0]=="sensor":
-            respons["value"].append({
+            sensor_obj = senosr.get(pk=splitsensor_rele[1])
+            respons["value"].append({      
                 "id": sensor_rele+"_"+"".join(str(x) for x in value ),
-                "name": senosr.get(pk=splitsensor_rele[1]).sensor.uniq_name,
+                "name": sensor_obj.sensor.uniq_name,
                 "pins": value,
-                "active":senosr.get(pk=splitsensor_rele[1]).enable
+                "active":sensor_obj.enable,
+                "sampleDuration":sensor_obj.sampleDuration *1000 if sensor_obj.sampleDuration else 3000 ,
             })
         elif splitsensor_rele[0]=="relay":
+            relay_obj = relay.get(pk=splitsensor_rele[1])
             respons["value"].append({
                 "id": sensor_rele+"_"+"".join(str(x) for x in value ),
-                "name": relay.get(pk=splitsensor_rele[1]).relay.uniq_name,
+                "name": relay_obj.relay.uniq_name,
                 "pins": value,
-                "active":relay.get(pk=splitsensor_rele[1]).enable
+                "active":relay_obj.enable
             })
     return json.dumps(respons)
      

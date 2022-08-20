@@ -96,6 +96,7 @@ class SensorForDevice(models.Model):
     id = models.AutoField(primary_key=True)
     device = models.ForeignKey(Device,on_delete=models.CASCADE,related_name="device_sensor")
     sensor = models.ForeignKey(Sensor,on_delete=models.CASCADE)
+    sampleDuration = models.IntegerField(default=3,blank=True)
     enable = models.BooleanField(default=True)
     def __str__(self):
         return f"{self.device.name} - {self.sensor.uniq_name} - {self.id} "
