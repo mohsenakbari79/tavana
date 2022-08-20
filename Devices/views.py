@@ -341,7 +341,7 @@ def sensorvalue(request,device,sensore=None):
                 print(rs.get_points(tags={"sensor_id": f"{sen.pk}"}))
                 senosr_list=senosr_list + list(rs.get_points(tags={"sensor_id": f"{sen.pk}"}))
                     
-        for value in senosr_list:
+        for value in senosr_list[-20:]:
             tempjson={
                         "sensor_id":value.pop('sensor_id',None),
                         "time":value.pop('time',None),
@@ -360,7 +360,7 @@ def sensorvalue(request,device,sensore=None):
                     "time":tempjson['time'],
                     "value":tempjson["data"],
                 })
-
+                
         return Response(data=respons)
     except Exception as e:
         print("salam",e, e.__traceback__.tb_lineno )
