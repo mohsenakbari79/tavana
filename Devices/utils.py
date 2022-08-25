@@ -6,8 +6,7 @@ from influxdb import InfluxDBClient
 from datetime import datetime
 from decouple import config
 import operator
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
+
 
 #Setup database
 redisclient = InfluxDBClient("influxdb", 8086, 'admin', 'Password1')
@@ -269,13 +268,3 @@ def ralay_for_device_update(relay:object,device:object):
         return (True,json.dumps(answer))
     return (False,"")
 
-def send_data_in_websocket(data):
-    channel_layer=get_channel_layer()
-    group_name= data.get("chat_id")
-    async_to_sync(channel_layer.group_send)(
-        group_name,
-        {
-            'type': 'send_response',
-            'message': str(data.get("message"))
-        }
-    )

@@ -47,6 +47,9 @@ from celery import current_app
 from rest_framework.decorators import authentication_classes, permission_classes
 import json
 import asyncio
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 
 class DeviceModelsViewSet(ModelViewSet):
     queryset = DeviceModels.objects.all()
@@ -438,3 +441,17 @@ def run_task_action(request):
         return Response({'error': f"not exit device  by id entered"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def send_data_in_websocket(request):
+    channel_layer=get_channel_layer()
+    group_name= request.POST.get("chat_id")
+    async_to_sync(channel_layer.group_send)(
+        group_name,
+        {
+            'type': 'send_response',
+            'message': str(request.POST.get("message"))
+        }
+    )

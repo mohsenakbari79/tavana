@@ -14,6 +14,7 @@ from time import sleep
 # chaneels layer 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+import requests as re
 
 router_amqp={}
 # sleep(10)
@@ -39,7 +40,12 @@ def callback(ch, method, properties, body):
             elif swich == "Output":
                 value_dic =  body.get('value',{})
                 print("\n OUTPUBGET ",value_dic)
-                send_data_in_websocket(value_dic)
+                
+                data={
+                    "chat_id":value_dic.get("chat_id"),
+                    "message":value_dic.get("message")
+                }
+                re.post("http://giahino:8000/api/ws/send/",data=data)
 
 
         # print(body)

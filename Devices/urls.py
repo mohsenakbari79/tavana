@@ -29,5 +29,6 @@ urlpatterns = [
 	path('api/tasksname/',tasksname,name="tasksname"),
 	path('api/gettoken/<str:device_id>',get_device_token,name="getdevicetoken"),
     path('api/task/action/',run_task_action,name="task_action"),
+    path('api/ws/send/',send_data_in_websocket,name="ws_action"),
 	
 ]
