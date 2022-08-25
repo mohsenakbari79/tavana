@@ -5,7 +5,7 @@ import json
 import threading
 from Auth.models import AuthDevice
 # from Devices.models import Device,SensorForDevice,Sensor
-from Devices.utils import add_sensor_to_device,add_sensor,sensor_value_get,pin_and_sensor_of_device,send_data_in_websocket
+from Devices.utils import add_sensor_to_device,add_sensor,sensor_value_get,pin_and_sensor_of_device
 # client = redis.Redis(host='localhost', port=6379, db=0)
 # result = client.json().get('somejson:1')
 
