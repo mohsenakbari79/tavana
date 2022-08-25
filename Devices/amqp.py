@@ -41,7 +41,7 @@ def callback(ch, method, properties, body):
                 print("\n OUTPUBGET ",value_dic)
 
 
-                channel_layer = get_channels_layer()
+                channel_layer = get_channel_layer()
                 async_to_sync(channel_layer.group_send)(value_dic.get("chat_id"),{
                         'type':"send.response",
                         "response":value_dic.get("message")
