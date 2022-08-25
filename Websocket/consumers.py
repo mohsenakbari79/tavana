@@ -38,7 +38,7 @@ class DeviceJsonData(AsyncJsonWebsocketConsumer):
                 await self.accept()
                 await self.channel_layer.group_add(
                     f"{self.device_id}_{self.sensor_id}",
-                    self.channel_name,
+                    self.channel_name
                 )
         except Exception as e:
             print("CONNECT ERROR",e)
@@ -50,6 +50,10 @@ class DeviceJsonData(AsyncJsonWebsocketConsumer):
 
     async def disconnect(self, close_code):
         print(f"close connect web socket :) status code ={close_code} ")
+        await self.channel_layer.group_discard(
+            f"{self.device_id}_{self.sensor_id}",
+            self.channel_name
+        )
     async def receive_json(self, content, **kwargs):
         
         content["chat_id"] = f"{self.device_id}_{self.sensor_id}"

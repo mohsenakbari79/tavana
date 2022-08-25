@@ -5,7 +5,7 @@ import json
 import threading
 from Auth.models import AuthDevice
 # from Devices.models import Device,SensorForDevice,Sensor
-from Devices.utils import add_sensor_to_device,add_sensor,sensor_value_get,pin_and_sensor_of_device
+from Devices.utils import add_sensor_to_device,add_sensor,sensor_value_get,pin_and_sensor_of_device,send_data_in_websocket
 # client = redis.Redis(host='localhost', port=6379, db=0)
 # result = client.json().get('somejson:1')
 
@@ -39,14 +39,8 @@ def callback(ch, method, properties, body):
             elif swich == "Output":
                 value_dic =  body.get('value',{})
                 print("\n OUTPUBGET ",value_dic)
+                send_data_in_websocket(value_dic)
 
-
-                channel_layer = get_channel_layer()
-                async_to_sync(channel_layer.group_send)(value_dic.get("chat_id"),{
-                        'type':"send.response",
-                        "response":value_dic.get("message")
-                    }
-                )
 
         # print(body)
         # # if method.routing_key:
