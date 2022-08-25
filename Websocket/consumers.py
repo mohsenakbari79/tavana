@@ -55,7 +55,7 @@ class DeviceJsonData(AsyncJsonWebsocketConsumer):
         content["chat_id"] = f"{self.device_id}_{self.sensor_id}"
         content["id"] = f"sensor_{self.sensor_id}"
         temp = {
-                "type": "Output",
+                "type": "Input",
                 "value": content
                 } 
         print("receive",content,self.device.auth.mac_addres,temp)
