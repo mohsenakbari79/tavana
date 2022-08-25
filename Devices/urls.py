@@ -28,6 +28,6 @@ urlpatterns = [
 	path('api/value/sensor/<str:device>/<str:sensore>',sensorvalue,name="senosrvalueall"),
 	path('api/tasksname/',tasksname,name="tasksname"),
 	path('api/gettoken/<str:device_id>',get_device_token,name="getdevicetoken"),
-        path('api/task/action/',run_task_action,name="task_action"),
+    path('api/task/action/',run_task_action,name="task_action"),
 	
 ]

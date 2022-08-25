@@ -10,6 +10,11 @@ from Devices.utils import add_sensor_to_device,add_sensor,sensor_value_get,pin_a
 # result = client.json().get('somejson:1')
 
 from time import sleep
+
+# chaneels layer 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 router_amqp={}
 # sleep(10)
 PMI=PikaMassenger(host='rabbitmq',port=5672,username='shire',password='shire',exchange_name="amq.topic",exchange_type="topic")
@@ -31,6 +36,16 @@ def callback(ch, method, properties, body):
             elif swich == "Sensors_request":
                 temp=pin_and_sensor_of_device(device)
                 PMI.send_message(method.routing_key,temp)
+            elif swich == "Output":
+                value_dic =  body.get('value',{})
+
+                channel_layer = get_channels_layer()
+                async_to_sync(channel_layer.group_send)(value_dic.get("chat_id"),{
+                        'type':"send.response",
+                        "response":value_dic.get("message")
+                    }
+                )
+
         # print(body)
         # # if method.routing_key:
         # if method.router_key:
