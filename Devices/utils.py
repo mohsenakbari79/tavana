@@ -270,6 +270,7 @@ def ralay_for_device_update(relay:object,device:object):
     return (False,"")
 
 def send_data_in_websocket(data):
+    channel_layer=get_channel_layer()
     group_name= data.get("chat_id")
     async_to_sync(channel_layer.group_send)(
         group_name,
