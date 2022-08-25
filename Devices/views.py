@@ -403,7 +403,12 @@ def get_device_token(request,device_id):
     try:
         device = Device.objects.get(pk=device_id)
         if  request.user == device.user:
-            return Response(data={"auth_token":str(device.auth.token)})
+            res_data = {
+                "auth_token" : str(device.auth.token),
+                "mac_addres" : str(device.auth.mac_addres)
+
+            }
+            return Response(data=res_data)
         else:
             return Response(data={"error":"not accsses to get token for entered device"})
     except Exception as e:

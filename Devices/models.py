@@ -59,6 +59,7 @@ class Sensor(models.Model):
             MaxValueValidator(100),
             MinValueValidator(1)
         ])
+    mutualـcommunication = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.uniq_name}"
 

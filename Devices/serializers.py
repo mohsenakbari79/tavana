@@ -42,7 +42,7 @@ class SensoreSerializer(serializers.ModelSerializer):
     uniq_name = serializers.CharField()
     class Meta:
         model = Sensor
-        fields = ('pk','uniq_name','pin_number')
+        fields = ('pk','uniq_name','pin_number','mutualـcommunication')
 
 
 

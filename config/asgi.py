@@ -21,6 +21,9 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 
 
 from config.routing import TokenAuthMiddleware
+from Devices.amqp import test1
+test1.start()
+
 
 websocket_urlpatterns =[]
 websocket_urlpatterns += Web_websocket_urlpatterns

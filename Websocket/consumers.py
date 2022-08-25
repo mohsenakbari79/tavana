@@ -4,8 +4,9 @@ from channels.generic.websocket import JsonWebsocketConsumer, AsyncJsonWebsocket
 import json
 import requests
 from Devices.amqp import PMI
-#CONTROLLER_ADDR="192.168.5.195"
 
+# models
+from Devices.models import Device
 
 
 
@@ -16,6 +17,17 @@ class DeviceJsonData(AsyncJsonWebsocketConsumer):
     async def connect(self):
         self.sensor_id = self.scope['url_route']['kwargs']['sensorId']
         self.device_id = self.scope['url_route']['kwargs']['deviceId']
+        device_temp = Device.objects.filter(pk=self.device_id )
+        
+        if device_temp.exists():
+            self.device = device_temp.first()
+            temp_sensor = self.device.device_sensor.filter(pk = self.sensor_id )
+            if not temp_sensor.exists():
+                await self.close(404)
+            if temp_sensor.first().sensor.mutualـcommunication:
+                await self.close(400)
+        else :
+            await self.close(404)
         if 'user' not in self.scope:
             await self.close(403)
         elif self.scope['user'].is_anonymous:
@@ -41,7 +53,7 @@ class DeviceJsonData(AsyncJsonWebsocketConsumer):
                 "value": content
                 } 
 
-        PMI.send_message(method.routing_key,temp)
+        PMI.send_message(str(self.device.auth.mac_addres),temp)
         
     async def send_response(self, data):
         await self.send_json(data)
