@@ -46,6 +46,7 @@ class DeviceJsonData(AsyncJsonWebsocketConsumer):
     async def disconnect(self, close_code):
         print(f"close connect web socket :) status code ={close_code} ")
     async def receive_json(self, content, **kwargs):
+        print("receive",connect)
         content["chat_id"] = f"{self.device_id}_{self.sensor_id}"
         content["id"] = f"sensor_{self.sensor_id}"
         temp = {
@@ -56,6 +57,7 @@ class DeviceJsonData(AsyncJsonWebsocketConsumer):
         PMI.send_message(str(self.device.auth.mac_addres),temp)
         
     async def send_response(self, data):
+        print(data,"sendrespnese")
         await self.send_json(data)
     
 

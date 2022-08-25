@@ -38,6 +38,8 @@ def callback(ch, method, properties, body):
                 PMI.send_message(method.routing_key,temp)
             elif swich == "Output":
                 value_dic =  body.get('value',{})
+                print("\n OUTPUBGET ",value_dic)
+
 
                 channel_layer = get_channels_layer()
                 async_to_sync(channel_layer.group_send)(value_dic.get("chat_id"),{
