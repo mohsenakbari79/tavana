@@ -12,6 +12,7 @@ from Devices.models import Device
 
 
 
+
 class DeviceJsonData(AsyncJsonWebsocketConsumer):
     
     async def connect(self):
@@ -59,7 +60,7 @@ class DeviceJsonData(AsyncJsonWebsocketConsumer):
                 } 
         print("receive",content,self.device.auth.mac_addres,temp)
 
-        PMI.send_message(str(self.device.auth.mac_addres),temp)
+        PMI.send_message(str(self.device.auth.mac_addres),json.dumps(temp))
         
     async def send_response(self, data):
         print(data,"sendrespnese")
