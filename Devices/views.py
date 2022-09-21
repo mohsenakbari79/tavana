@@ -455,3 +455,5 @@ def send_data_in_websocket(request):
             'message': str(request.POST.get("message"))
         }
     )
+    return Response(data={"status":"ok",})
+
