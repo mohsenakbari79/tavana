@@ -76,9 +76,15 @@ class FilterDeviceWithUser(serializers.PrimaryKeyRelatedField):
 
 class SensorForDeviceSerializer(serializers.ModelSerializer):
     device = FilterDeviceWithUser()
+    def get_device(self,obj):
+        return {
+            "status":obj.sensor.mutualـcommunicatio,
+                }
+    mutual_communication = serializers.SerializerMethodField("get_device")
+
     class Meta:
         model = SensorForDevice
-        fields = ('pk','device','sensor','sampleDuration','enable')
+        fields = ('pk','device','sensor',"mutual_communication",'sampleDuration','enable')
 
 class RelayForDeviceSerializer(serializers.ModelSerializer):
     device = FilterDeviceWithUser()

@@ -26,7 +26,7 @@ class DeviceJsonData(AsyncJsonWebsocketConsumer):
                 temp_sensor = self.device.device_sensor.filter(pk = self.sensor_id )
                 if not temp_sensor.exists():
                     await self.close(404)
-                if temp_sensor.first().sensor.mutualـcommunication:
+                if not temp_sensor.first().sensor.mutualـcommunication:
                     await self.close(400)
             else :
                 await self.close(404)
